@@ -7,75 +7,56 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
   --bg:#0B1929;--surface:#0F2233;--card:#132A3E;--card2:#183348;
-  --primary:#4FC3F7;--accent:#00E5FF;--text:#E8EEF4;--text-sec:rgba(232,238,244,0.55);
+  --primary:#4FC3F7;--text:#E8EEF4;--text-sec:rgba(232,238,244,0.55);
   --border:rgba(79,195,247,0.15);--on-primary:#00222E;
 }
 body.light{
   --bg:#F0F4F8;--surface:#FFFFFF;--card:#E1E8F0;--card2:#D0DAE5;
-  --primary:#0288D1;--accent:#01579B;--text:#0B1929;--text-sec:rgba(11,25,41,0.6);
+  --primary:#0288D1;--text:#0B1929;--text-sec:rgba(11,25,41,0.6);
   --border:rgba(2,136,209,0.2);--on-primary:#FFFFFF;
 }
-body{font-family:-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:0 14px 30px;overflow-x:hidden;transition:background .2s,color .2s}
+body{font-family:-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:0 14px 30px;overflow-x:hidden}
 
-.topbar{display:flex;align-items:center;gap:8px;padding:10px 0;position:sticky;top:0;background:var(--bg);z-index:10}
-.tb-btn{min-width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--surface);color:var(--primary);border:1px solid var(--border);font-size:15px;font-weight:700;padding:0 10px;cursor:pointer;transition:transform .15s}
-.tb-btn:active{transform:scale(0.93);background:var(--card2)}
-.tb-btn.on{background:#69F0AE;color:#00220f;border-color:transparent}
-.spacer{flex:1}
+/* NO topbar here — done natively */
 
-.hero{display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:12px}
-.logo-ring{width:130px;height:130px;border-radius:50%;background:conic-gradient(from 200deg,var(--primary),var(--accent),var(--primary));padding:4px;box-shadow:0 0 40px rgba(79,195,247,0.25);animation:glow 3s ease-in-out infinite}
-@keyframes glow{0%,100%{box-shadow:0 0 40px rgba(79,195,247,0.25)}50%{box-shadow:0 0 60px rgba(79,195,247,0.45)}}
-.logo-inner{width:100%;height:100%;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:64px}
-.app-name{font-size:22px;font-weight:800;color:var(--text)}
-.app-name .en{color:var(--primary);font-size:16px;opacity:0.85;margin-inline-start:6px}
+.hero{display:flex;flex-direction:column;align-items:center;padding:24px 0 18px;gap:10px}
+.logo-ring{width:110px;height:110px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--card2));padding:3px}
+.logo-inner{width:100%;height:100%;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:56px}
+.app-name{font-size:20px;font-weight:800;color:var(--text)}
+.app-name .en{color:var(--primary);font-size:14px;opacity:0.85;margin-inline-start:6px}
 
-.search-wrap{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:50px;padding:4px 6px 4px 16px;height:52px;margin-top:10px;box-shadow:0 4px 20px rgba(0,0,0,0.15)}
-.search-input{flex:1;font-size:15px;color:var(--text);background:none;border:none;outline:none;padding:0 10px;min-width:0}
+.search-wrap{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:50px;padding:4px 6px 4px 14px;height:50px;margin-top:8px}
+.search-input{flex:1;font-size:15px;color:var(--text);background:none;border:none;outline:none;padding:0 8px;min-width:0}
 .search-input::placeholder{color:var(--text-sec)}
-.engine-btn{display:flex;align-items:center;gap:6px;background:var(--card2);border-radius:50px;padding:6px 10px;height:40px;cursor:pointer;flex-shrink:0;transition:transform .15s}
-.engine-btn:active{transform:scale(0.94)}
-.engine-dot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff}
-.engine-arrow{font-size:11px;color:var(--primary)}
+.engine-btn{display:flex;align-items:center;gap:5px;background:var(--card2);border-radius:50px;padding:5px 9px;height:38px;cursor:pointer;flex-shrink:0}
+.engine-dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#fff}
+.engine-arrow{font-size:10px;color:var(--primary)}
 
-.section-title{font-size:12px;font-weight:700;letter-spacing:1px;color:var(--text-sec);margin:22px 4px 10px}
-.shortcuts{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-@media(max-width:340px){.shortcuts{grid-template-columns:repeat(3,1fr)}}
-.sc-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 2px;border-radius:14px;text-decoration:none;color:inherit;transition:background .15s;position:relative}
-.sc-item:active{background:var(--surface)}
-.sc-ico{width:54px;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,0.25)}
-.sc-ico.add{background:var(--surface);border:2px dashed var(--primary);color:var(--primary);box-shadow:none}
-.sc-name{font-size:11px;color:var(--text-sec);text-align:center;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.hint{font-size:11px;color:var(--text-sec);text-align:center;padding:14px 10px;opacity:0.7}
+.section-title{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--text-sec);margin:20px 4px 10px}
+.shortcuts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.sc-item{display:flex;flex-direction:column;align-items:center;gap:5px;padding:6px 2px;border-radius:12px;text-decoration:none;color:inherit}
+.sc-ico{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff}
+.sc-ico.add{background:var(--surface);border:2px dashed var(--primary);color:var(--primary)}
+.sc-name{font-size:10px;color:var(--text-sec);text-align:center;max-width:68px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hint{font-size:10px;color:var(--text-sec);text-align:center;padding:12px 10px;opacity:0.6}
 
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center;z-index:100}
-.modal-bg.open{display:flex;animation:fadeIn .18s}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.modal{background:var(--bg);width:100%;max-width:600px;border-radius:22px 22px 0 0;padding:22px 20px 26px;border-top:1px solid var(--border);animation:slideUp .22s}
-@keyframes slideUp{from{transform:translateY(30px)}to{transform:none}}
-.modal h3{font-size:17px;font-weight:700;margin-bottom:16px;text-align:center;color:var(--text)}
-.eng-opt{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;cursor:pointer;transition:transform .15s}
-.eng-opt:active{transform:scale(0.98);background:var(--card2)}
+/* MODALS */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:flex-end;justify-content:center;z-index:100}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg);width:100%;max-width:600px;border-radius:20px 20px 0 0;padding:20px 18px 24px;border-top:1px solid var(--border)}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:14px;text-align:center;color:var(--text)}
+.eng-opt{display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:7px;cursor:pointer}
 .eng-opt.selected{border-color:var(--primary);background:var(--card2)}
-.eng-opt .dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:16px}
+.eng-opt .dot{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:15px}
 .eng-opt .nm{flex:1;font-weight:600;color:var(--text)}
-.eng-opt .ck{color:var(--primary);font-size:18px}
-.inp{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;color:var(--text);font-size:15px;outline:none;margin-bottom:10px;font-family:inherit}
+.eng-opt .ck{color:var(--primary);font-size:17px}
+.inp{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px;color:var(--text);font-size:14px;outline:none;margin-bottom:9px;font-family:inherit}
 .inp:focus{border-color:var(--primary)}
-.btn{width:100%;padding:14px;border-radius:12px;background:var(--primary);color:var(--on-primary);font-weight:700;font-size:15px;border:none;cursor:pointer;margin-top:6px}
+.btn{width:100%;padding:13px;border-radius:12px;background:var(--primary);color:var(--on-primary);font-weight:700;font-size:14px;border:none;cursor:pointer;margin-top:5px}
 .btn.ghost{background:var(--surface);color:var(--text);border:1px solid var(--border)}
-.btn:active{transform:scale(0.98)}
 </style>
 </head>
 <body>
-
-<div class="topbar">
-  <button class="tb-btn" id="transBtn" title="Translate">A/文</button>
-  <button class="tb-btn" id="themeBtn" title="Theme">🌙</button>
-  <button class="tb-btn" id="vpnBtn" title="VPN">🛡</button>
-  <div class="spacer"></div>
-  <button class="tb-btn" id="menuBtn" title="Settings">⋮</button>
-</div>
 
 <div class="hero">
   <div class="logo-ring"><div class="logo-inner">🐺</div></div>
@@ -83,7 +64,7 @@ body{font-family:-apple-system,sans-serif;background:var(--bg);color:var(--text)
 </div>
 
 <div class="search-wrap">
-  <span style="font-size:18px;opacity:0.6">🔍</span>
+  <span style="font-size:17px;opacity:0.6">🔍</span>
   <input class="search-input" id="q" type="text" placeholder="ابحث أو اكتب عنواناً..." autocomplete="off">
   <div class="engine-btn" id="engineBtn">
     <span class="engine-dot" id="engineDot" style="background:#4285F4">G</span>
@@ -93,11 +74,11 @@ body{font-family:-apple-system,sans-serif;background:var(--bg);color:var(--text)
 
 <div class="section-title">المواقع السريعة</div>
 <div class="shortcuts" id="sc"></div>
-<div class="hint">اضغط على + لإضافة موقع جديد</div>
+<div class="hint">اضغط + لإضافة موقع • اضغط مطولاً للحذف</div>
 
 <div class="modal-bg" id="engModal">
   <div class="modal">
-    <h3>اختر محرك البحث</h3>
+    <h3>محرك البحث</h3>
     <div id="engList"></div>
     <button class="btn ghost" onclick="closeModal('engModal')">إغلاق</button>
   </div>
@@ -106,8 +87,8 @@ body{font-family:-apple-system,sans-serif;background:var(--bg);color:var(--text)
 <div class="modal-bg" id="addModal">
   <div class="modal">
     <h3>إضافة موقع</h3>
-    <input class="inp" id="newName" placeholder="اسم الموقع (مثال: YouTube)">
-    <input class="inp" id="newUrl" placeholder="الرابط (https://...)" style="direction:ltr;text-align:left">
+    <input class="inp" id="newName" placeholder="الاسم">
+    <input class="inp" id="newUrl" placeholder="https://..." style="direction:ltr;text-align:left">
     <button class="btn" onclick="saveNew()">حفظ</button>
     <button class="btn ghost" onclick="closeModal('addModal')">إلغاء</button>
   </div>
@@ -120,7 +101,6 @@ var ENGINES = {
   ddg:    {name:'DuckDuckGo', url:'https://duckduckgo.com/?q=',        color:'#DE5833', letter:'D'},
   yandex: {name:'Yandex',     url:'https://yandex.com/search/?text=',  color:'#FC3F1D', letter:'Y'}
 };
-
 var DEFAULT_SC = [
   { name:'YouTube',  url:'https://youtube.com',        color:'#FF0000', icon:'▶' },
   { name:'Telegram', url:'https://web.telegram.org',   color:'#229ED9', icon:'✈' },
@@ -131,24 +111,13 @@ var DEFAULT_SC = [
   { name:'XDA',      url:'https://xda-developers.com', color:'#FF6E00', icon:'X' }
 ];
 
-function ls(k, v){
-  try{
-    if(v === undefined) return localStorage.getItem(k);
-    localStorage.setItem(k, v);
-  }catch(e){ return null; }
-}
-
+function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); }catch(e){return null;} }
 var currentEngine = ls('engine') || 'google';
 var theme = ls('theme') || 'dark';
-var shortcuts = [];
-try{ shortcuts = JSON.parse(ls('shortcuts') || 'null') || DEFAULT_SC.slice(); }
-catch(e){ shortcuts = DEFAULT_SC.slice(); }
+var shortcuts;
+try{ shortcuts = JSON.parse(ls('shortcuts')||'null') || DEFAULT_SC.slice(); }catch(e){ shortcuts = DEFAULT_SC.slice(); }
 
-function applyTheme(){
-  document.body.classList.toggle('light', theme === 'light');
-  document.getElementById('themeBtn').textContent = theme === 'light' ? '☀' : '🌙';
-  ls('theme', theme);
-}
+if(theme === 'light') document.body.classList.add('light');
 
 function updateEngineDot(){
   var e = ENGINES[currentEngine];
@@ -158,15 +127,32 @@ function updateEngineDot(){
 }
 
 function render(){
-  var html = shortcuts.map(function(s,i){
-    return '<a class="sc-item" href="'+s.url+'">'+
+  var html = shortcuts.map(function(s){
+    return '<a class="sc-item" href="'+s.url+'" data-url="'+s.url+'">'+
       '<div class="sc-ico" style="background:'+s.color+'">'+s.icon+'</div>'+
       '<div class="sc-name">'+s.name+'</div>'+
     '</a>';
   }).join('');
   html += '<div class="sc-item" id="addBtn"><div class="sc-ico add">＋</div><div class="sc-name">إضافة</div></div>';
   document.getElementById('sc').innerHTML = html;
+
   document.getElementById('addBtn').onclick = function(){ openModal('addModal'); };
+
+  document.querySelectorAll('.sc-item[data-url]').forEach(function(el){
+    var url = el.getAttribute('data-url');
+    var timer;
+    el.addEventListener('touchstart', function(){
+      timer = setTimeout(function(){
+        if(confirm('حذف هذا الموقع؟')){
+          shortcuts = shortcuts.filter(function(s){ return s.url !== url; });
+          ls('shortcuts', JSON.stringify(shortcuts));
+          render();
+        }
+      }, 600);
+    }, {passive:true});
+    el.addEventListener('touchend', function(){ clearTimeout(timer); });
+    el.addEventListener('touchmove', function(){ clearTimeout(timer); });
+  });
 }
 
 function openModal(id){ document.getElementById(id).classList.add('open'); }
@@ -221,12 +207,6 @@ document.getElementById('q').addEventListener('keydown', function(e){
   location.href = url;
 });
 
-document.getElementById('transBtn').onclick = function(){ location.href = 'resource://android/assets/translate.html'; };
-document.getElementById('themeBtn').onclick = function(){ theme = (theme === 'dark' ? 'light' : 'dark'); applyTheme(); };
-document.getElementById('vpnBtn').onclick = function(){ this.classList.toggle('on'); };
-document.getElementById('menuBtn').onclick = function(){ location.href = 'resource://android/assets/settings.html'; };
-
-applyTheme();
 updateEngineDot();
 render();
 </script>
