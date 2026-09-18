@@ -192,10 +192,17 @@ class BrowserFragment : Fragment() {
 
     private fun loadUrl(u: String) { tabs.activeTab()?.session?.loadUri(u) }
 
+    // ★★★ هنا كل أوامر wolf:// — بما فيها open ★★★
     private fun handleWolf(u: String) {
         try {
             val uri = Uri.parse(u)
             when (uri.host) {
+                "open" -> {
+                    val target = uri.getQueryParameter("u")
+                        ?: uri.getQueryParameter("url")
+                        ?: return
+                    loadUrl(target)
+                }
                 "bookmarks" -> loadBookmarks()
                 "history" -> loadHistory()
                 "downloads" -> loadDownloads()
@@ -204,8 +211,14 @@ class BrowserFragment : Fragment() {
                     Storage.addBookmark(requireContext(), url, uri.getQueryParameter("title") ?: "")
                     toast("تم الحفظ"); loadBookmarks()
                 }
-                "remove-bookmark" -> { Storage.removeBookmark(requireContext(), uri.getQueryParameter("url") ?: return); loadBookmarks() }
-                "remove-history" -> { Storage.removeHistoryItem(requireContext(), uri.getQueryParameter("url") ?: return); loadHistory() }
+                "remove-bookmark" -> {
+                    Storage.removeBookmark(requireContext(), uri.getQueryParameter("url") ?: return)
+                    loadBookmarks()
+                }
+                "remove-history" -> {
+                    Storage.removeHistoryItem(requireContext(), uri.getQueryParameter("url") ?: return)
+                    loadHistory()
+                }
                 "clear-history" -> { Storage.clearHistory(requireContext()); toast("تم"); loadHistory() }
                 "clear-bookmarks" -> { Storage.clearBookmarks(requireContext()); toast("تم"); loadBookmarks() }
                 "clear-downloads" -> { Storage.clearDownloads(requireContext()); toast("تم"); loadDownloads() }

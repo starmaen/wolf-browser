@@ -59,9 +59,14 @@ var sc;try{sc=JSON.parse(ls('shortcuts')||'null')||DEFAULT.slice()}catch(e){sc=D
 if((ls('theme')||'dark')==='light')document.body.classList.add('light');
 function updateEng(){var e=ENGINES[curEng];var d=document.getElementById('engineDot');d.textContent=e.letter;d.style.background=e.color}
 
-// ★ استخدام وظيفة عالمية مفردة للأيقونات
-window.__wolf_open=function(url){ window.location.href = url; };
-window.__wolf_del=function(url){
+// ★★ استخدام wolf:// بدل location.href ★★
+function openUrl(u){
+  // جرب wolf:// أولاً — الطريقة الموثوقة في GeckoView
+  window.location.href = 'wolf://open?u=' + encodeURIComponent(u);
+}
+
+window.__wolf_open = openUrl;
+window.__wolf_del = function(url){
   if(confirm('حذف هذا الموقع؟')){
     sc=sc.filter(function(x){return x.url!==url});
     ls('shortcuts',JSON.stringify(sc));
@@ -74,7 +79,7 @@ function render(){
   for(var i=0;i<sc.length;i++){
     var s=sc[i];
     h+='<div class="sc-item" '+
-      'onclick="window.__wolf_open(\''+s.url.replace(/'/g,"\\'")+'\')" '+
+      'onclick="event.stopPropagation();window.__wolf_open(\''+s.url.replace(/'/g,"\\'")+'\')" '+
       'ontouchstart="window.__wolf_ts(event,\''+s.url.replace(/'/g,"\\'")+'\')" '+
       'ontouchend="window.__wolf_te()" '+
       'ontouchmove="window.__wolf_tm()">'+
@@ -82,7 +87,7 @@ function render(){
       '<div class="sc-name">'+s.name+'</div>'+
     '</div>';
   }
-  h+='<div class="sc-item" onclick="openModal(\'addModal\')"><div class="sc-ico add">＋</div><div class="sc-name">إضافة</div></div>';
+  h+='<div class="sc-item" onclick="event.stopPropagation();openModal(\'addModal\')"><div class="sc-ico add">＋</div><div class="sc-name">إضافة</div></div>';
   document.getElementById('sc').innerHTML=h;
 }
 var _t=null,_lp=false;
@@ -122,7 +127,7 @@ function doSearch(){
   if(/^https?:\/\//i.test(q))u=q;
   else if(/^[a-z0-9.-]+\.[a-z]{2,}(\/.*)?$/i.test(q))u='https://'+q;
   else u=ENGINES[curEng].url+encodeURIComponent(q);
-  window.location.href=u;
+  openUrl(u);
 }
 updateEng();render();
 </script></body></html>

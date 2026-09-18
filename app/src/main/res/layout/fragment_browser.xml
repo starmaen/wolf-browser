@@ -3,8 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#0B1929"
-    android:fitsSystemWindows="true">
+    android:background="#0B1929">
 
     <ProgressBar
         android:id="@+id/progressBar"
@@ -15,67 +14,65 @@
         android:progressTint="#4FC3F7"
         android:visibility="gone" />
 
+    <!-- الشريط العلوي -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="52dp"
         android:orientation="horizontal"
         android:background="#0F2233"
         android:gravity="center_vertical"
-        android:paddingHorizontal="4dp">
+        android:paddingHorizontal="6dp">
 
-        <Button
+        <TextView
             android:id="@+id/homeBtn"
-            android:layout_width="38dp"
-            android:layout_height="38dp"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
             android:background="#132A3E"
             android:text="🏠"
-            android:textSize="14sp"
-            android:padding="0dp"
-            android:minWidth="0dp"
-            android:minHeight="0dp"
-            android:stateListAnimator="@null" />
+            android:textSize="18sp"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true" />
 
         <EditText
             android:id="@+id/urlBar"
             android:layout_width="0dp"
-            android:layout_height="38dp"
+            android:layout_height="42dp"
             android:layout_weight="1"
             android:background="#132A3E"
             android:hint="ابحث..."
             android:textColor="#E8EEF4"
             android:textColorHint="#80FFFFFF"
-            android:paddingHorizontal="10dp"
+            android:paddingHorizontal="12dp"
             android:singleLine="true"
             android:imeOptions="actionGo"
             android:inputType="textUri"
-            android:textSize="12sp"
-            android:layout_marginHorizontal="3dp" />
+            android:textSize="13sp"
+            android:layout_marginHorizontal="6dp" />
 
-        <Button
+        <TextView
             android:id="@+id/bookmarkBtn"
-            android:layout_width="38dp"
-            android:layout_height="38dp"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
             android:background="#132A3E"
             android:text="⭐"
-            android:textSize="14sp"
-            android:padding="0dp"
-            android:minWidth="0dp"
-            android:minHeight="0dp"
-            android:stateListAnimator="@null" />
+            android:textSize="18sp"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true" />
 
-        <Button
+        <TextView
             android:id="@+id/menuBtn"
-            android:layout_width="38dp"
-            android:layout_height="38dp"
-            android:layout_marginStart="3dp"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_marginStart="6dp"
             android:background="#132A3E"
             android:text="⋮"
-            android:textSize="17sp"
+            android:textSize="22sp"
             android:textColor="#4FC3F7"
-            android:padding="0dp"
-            android:minWidth="0dp"
-            android:minHeight="0dp"
-            android:stateListAnimator="@null" />
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true" />
 
     </LinearLayout>
 
@@ -85,79 +82,78 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
+    <!-- الشريط السفلي -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="50dp"
         android:orientation="horizontal"
         android:background="#0F2233"
         android:gravity="center_vertical"
-        android:paddingHorizontal="4dp">
+        android:paddingHorizontal="6dp">
 
-        <Button
+        <TextView
             android:id="@+id/backBtn"
             android:layout_width="42dp"
             android:layout_height="42dp"
-            android:background="@android:color/transparent"
+            android:background="#132A3E"
             android:text="◀"
             android:textSize="16sp"
             android:textColor="#4FC3F7"
-            android:padding="0dp"
-            android:minWidth="0dp"
-            android:minHeight="0dp"
-            android:stateListAnimator="@null" />
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true" />
 
-        <Button
+        <TextView
             android:id="@+id/fwdBtn"
             android:layout_width="42dp"
             android:layout_height="42dp"
-            android:background="@android:color/transparent"
+            android:background="#132A3E"
+            android:layout_marginStart="4dp"
             android:text="▶"
             android:textSize="16sp"
             android:textColor="#4FC3F7"
-            android:padding="0dp"
-            android:minWidth="0dp"
-            android:minHeight="0dp"
-            android:stateListAnimator="@null" />
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true" />
 
-        <Button
+        <TextView
             android:id="@+id/tabsBtn"
             android:layout_width="0dp"
             android:layout_height="42dp"
             android:layout_weight="1"
             android:background="#132A3E"
             android:text="📑 1"
-            android:textSize="12sp"
+            android:textSize="13sp"
             android:textColor="#E8EEF4"
-            android:minWidth="0dp"
-            android:minHeight="0dp"
-            android:stateListAnimator="@null"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
             android:layout_marginHorizontal="4dp" />
 
-        <Button
+        <TextView
             android:id="@+id/newTabBtn"
             android:layout_width="42dp"
             android:layout_height="42dp"
-            android:background="@android:color/transparent"
+            android:background="#132A3E"
             android:text="＋"
-            android:textSize="19sp"
+            android:textSize="22sp"
             android:textColor="#4FC3F7"
-            android:padding="0dp"
-            android:minWidth="0dp"
-            android:minHeight="0dp"
-            android:stateListAnimator="@null" />
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true" />
 
-        <Button
+        <TextView
             android:id="@+id/syncBtn"
             android:layout_width="42dp"
             android:layout_height="42dp"
-            android:background="@android:color/transparent"
+            android:background="#132A3E"
+            android:layout_marginStart="4dp"
             android:text="☁"
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:textColor="#4FC3F7"
-            android:padding="0dp"
-            android:minWidth="0dp"
-            android:minHeight="0dp"
-            android:stateListAnimator="@null" />
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true" />
 
     </LinearLayout>
 
