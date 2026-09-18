@@ -69,16 +69,19 @@ class BrowserFragment : Fragment() {
     private fun attachSession(s: GeckoSession) {
         s.progressDelegate = object : GeckoSession.ProgressDelegate {
             override fun onPageStart(sess: GeckoSession, u: String) {
-                if (sess === tabs.activeTab()?.session) { showProgress(); curUrl = u; updateUrl(u) }
+                if (sess === tabs.activeTab()?.session) {
+                    activity?.runOnUiThread { b.progressBar.visibility = View.VISIBLE; b.progressBar.progress = 0 }
+                    curUrl = u; updateUrl(u)
+                }
             }
             override fun onPageStop(sess: GeckoSession, ok: Boolean) {
                 if (sess === tabs.activeTab()?.session) {
-                    hideProgress()
+                    activity?.runOnUiThread { b.progressBar.visibility = View.GONE }
                     if (ok && curUrl.isNotBlank()) Storage.addHistory(requireContext(), curUrl, curTitle)
                 }
             }
             override fun onProgressChange(sess: GeckoSession, p: Int) {
-                if (sess === tabs.activeTab()?.session) setProgress(p)
+                if (sess === tabs.activeTab()?.session) activity?.runOnUiThread { b.progressBar.progress = p }
             }
         }
         s.navigationDelegate = object : GeckoSession.NavigationDelegate {
@@ -86,8 +89,42 @@ class BrowserFragment : Fragment() {
             override fun onCanGoForward(sess: GeckoSession, ok: Boolean) { if (sess === tabs.activeTab()?.session) canFwd = ok }
             override fun onLoadRequest(sess: GeckoSession, req: GeckoSession.NavigationDelegate.LoadRequest): GeckoResult<AllowOrDeny>? {
                 val u = req.uri
-                if (u.startsWith("wolf://")) { handleWolf(u); return GeckoResult.fromValue(AllowOrDeny.DENY) }
-                if (DownloadsHelper.isDownloadUrl(u)) { startDl(u, null); return GeckoResult.fromValue(AllowOrDeny.DENY) }
+                // wolf:// — داخلي
+                if (u.startsWith("wolf://")) {
+                    activity?.runOnUiThread { handleWolf(u) }
+                    return GeckoResult.fromValue(AllowOrDeny.DENY)
+                }
+                // intent:// — تطبيقات خارجية
+                if (u.startsWith("intent://")) {
+                    try {
+                        val intent = Intent.parseUri(u, Intent.URI_INTENT_SCHEME)
+                        startActivity(intent)
+                    } catch(e: Exception) {
+                        // جرب الرابط الاحتياطي
+                        try {
+                            val fallback = Intent.parseUri(u, Intent.URI_INTENT_SCHEME).getStringExtra("browser_fallback_url")
+                            if(fallback != null) loadUrl(fallback)
+                        } catch(e2: Exception) {}
+                    }
+                    return GeckoResult.fromValue(AllowOrDeny.DENY)
+                }
+                // تنزيل
+                if (DownloadsHelper.isDownloadUrl(u)) {
+                    activity?.runOnUiThread { startDl(u, null) }
+                    return GeckoResult.fromValue(AllowOrDeny.DENY)
+                }
+                // بروتوكولات أخرى (tel:, mailto:, market:, whatsapp://... إلخ)
+                val scheme = try { Uri.parse(u).scheme?.lowercase() } catch(e: Exception) { null }
+                if (scheme != null && scheme !in listOf("http","https","resource","about","file","wolf","jar","data","blob","javascript")) {
+                    try {
+                        val i = Intent(Intent.ACTION_VIEW, Uri.parse(u))
+                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        startActivity(i)
+                    } catch(e: Exception) {
+                        activity?.runOnUiThread { toast("لا يوجد تطبيق يفتح هذا الرابط") }
+                    }
+                    return GeckoResult.fromValue(AllowOrDeny.DENY)
+                }
                 return GeckoResult.fromValue(AllowOrDeny.ALLOW)
             }
         }
@@ -108,10 +145,23 @@ class BrowserFragment : Fragment() {
                 "bookmarks" -> loadBookmarks()
                 "history" -> loadHistory()
                 "downloads" -> loadDownloads()
-                "add-bookmark" -> { Storage.addBookmark(requireContext(), uri.getQueryParameter("url") ?: return, uri.getQueryParameter("title") ?: ""); toast("تم الحفظ") }
-                "remove-bookmark" -> { Storage.removeBookmark(requireContext(), uri.getQueryParameter("url") ?: return); loadBookmarks() }
-                "clear-history" -> { Storage.clearHistory(requireContext()); loadHistory() }
-                "clear-bookmarks" -> { Storage.clearBookmarks(requireContext()); loadBookmarks() }
+                "add-bookmark" -> {
+                    val url = uri.getQueryParameter("url") ?: return
+                    val title = uri.getQueryParameter("title") ?: ""
+                    Storage.addBookmark(requireContext(), url, title); toast("تم الحفظ")
+                    loadBookmarks()
+                }
+                "remove-bookmark" -> {
+                    Storage.removeBookmark(requireContext(), uri.getQueryParameter("url") ?: return)
+                    loadBookmarks()
+                }
+                "remove-history" -> {
+                    Storage.removeHistoryItem(requireContext(), uri.getQueryParameter("url") ?: return)
+                    loadHistory()
+                }
+                "clear-history" -> { Storage.clearHistory(requireContext()); toast("تم مسح السجل"); loadHistory() }
+                "clear-bookmarks" -> { Storage.clearBookmarks(requireContext()); toast("تم مسح المفضلة"); loadBookmarks() }
+                "clear-downloads" -> { Storage.clearDownloads(requireContext()); toast("تم المسح"); loadDownloads() }
                 "clear-all" -> { Storage.clearAll(requireContext()); toast("تم مسح كل شيء") }
                 "export" -> exportSync()
                 "import" -> showImport()
@@ -121,16 +171,19 @@ class BrowserFragment : Fragment() {
 
     private fun startDl(u: String, f: String?) {
         val id = DownloadsHelper.start(requireContext(), u, f)
-        toast(if (id > 0) "بدأ التنزيل" else "فشل التنزيل")
+        toast(if (id > 0) "بدأ التنزيل في الخلفية" else "فشل بدء التنزيل")
     }
 
     private fun loadBookmarks() { loadUrl("resource://android/assets/bookmarks.html?d=${enc(Storage.getBookmarks(requireContext()).toString())}") }
     private fun loadHistory() { loadUrl("resource://android/assets/history.html?d=${enc(Storage.getHistory(requireContext()).toString())}") }
-    private fun loadDownloads() { loadUrl("resource://android/assets/downloads.html?d=${enc(Storage.getDownloads(requireContext()).toString())}") }
+    private fun loadDownloads() {
+        val realData = DownloadsHelper.queryAll(requireContext()).toString()
+        loadUrl("resource://android/assets/downloads.html?d=${enc(realData)}")
+    }
     private fun enc(s: String) = Base64.encodeToString(s.toByteArray(), Base64.NO_WRAP or Base64.URL_SAFE)
 
     private fun toggleBookmark() {
-        if (curUrl.isBlank() || curUrl.startsWith("resource://") || curUrl.startsWith("about:")) { toast("لا يمكن حفظ هذه الصفحة"); return }
+        if (curUrl.isBlank() || curUrl.startsWith("resource://") || curUrl.startsWith("about:") || curUrl.startsWith("jar:")) { toast("لا يمكن حفظ هذه الصفحة"); return }
         if (Storage.isBookmarked(requireContext(), curUrl)) { Storage.removeBookmark(requireContext(), curUrl); toast("تم الحذف") }
         else { Storage.addBookmark(requireContext(), curUrl, curTitle); toast("تم الحفظ") }
     }
@@ -204,12 +257,9 @@ class BrowserFragment : Fragment() {
     }
 
     private fun updateUrl(u: String) = activity?.runOnUiThread {
-        if (u.startsWith("resource://") || u.startsWith("file://")) { b.urlBar.setText(""); b.urlBar.hint = "ابحث..." }
+        if (u.startsWith("resource://") || u.startsWith("file://") || u.startsWith("jar:")) { b.urlBar.setText(""); b.urlBar.hint = "ابحث..." }
         else b.urlBar.setText(u)
     }
-    private fun showProgress() = activity?.runOnUiThread { b.progressBar.visibility = View.VISIBLE; b.progressBar.progress = 0 }
-    private fun hideProgress() = activity?.runOnUiThread { b.progressBar.visibility = View.GONE }
-    private fun setProgress(p: Int) = activity?.runOnUiThread { b.progressBar.progress = p }
 
     private fun showMenu(anchor: View) {
         val p = PopupMenu(requireContext(), anchor)

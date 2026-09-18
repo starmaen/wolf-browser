@@ -18,10 +18,10 @@ body{font-family:-apple-system,sans-serif;background:var(--bg);color:var(--text)
 .engine-arrow{font-size:10px;color:var(--primary)}
 .section-title{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--text-sec);margin:20px 4px 10px}
 .shortcuts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.sc-item{display:flex;flex-direction:column;align-items:center;gap:5px;padding:6px 2px;border-radius:12px;text-decoration:none;color:inherit;cursor:pointer}
-.sc-ico{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff}
+.sc-item{display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 2px;border-radius:12px;text-decoration:none;color:inherit;cursor:pointer;user-select:none}
+.sc-ico{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;pointer-events:none}
 .sc-ico.add{background:var(--surface);border:2px dashed var(--primary);color:var(--primary)}
-.sc-name{font-size:10px;color:var(--text-sec);text-align:center;max-width:68px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc-name{font-size:10px;color:var(--text-sec);text-align:center;max-width:68px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none}
 .hint{font-size:10px;color:var(--text-sec);text-align:center;padding:12px 10px;opacity:.6}
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center;z-index:100}
 .modal-bg.open{display:flex}
@@ -58,17 +58,36 @@ var curEng=ls('engine')||'google';var theme=ls('theme')||'dark';
 var sc;try{sc=JSON.parse(ls('shortcuts')||'null')||DEFAULT.slice()}catch(e){sc=DEFAULT.slice()}
 if(theme==='light')document.body.classList.add('light');
 function updateEng(){var e=ENGINES[curEng];var d=document.getElementById('engineDot');d.textContent=e.letter;d.style.background=e.color}
-function render(){var h=sc.map(function(s){return '<a class="sc-item" data-url="'+s.url+'"><div class="sc-ico" style="background:'+s.color+'">'+s.icon+'</div><div class="sc-name">'+s.name+'</div></a>'}).join('');
-h+='<div class="sc-item" id="addBtn"><div class="sc-ico add">＋</div><div class="sc-name">إضافة</div></div>';
-document.getElementById('sc').innerHTML=h;
-document.getElementById('addBtn').onclick=function(){openModal('addModal')};
-document.querySelectorAll('.sc-item[data-url]').forEach(function(el){
-  var u=el.getAttribute('data-url');var tm;
-  el.addEventListener('touchstart',function(){tm=setTimeout(function(){if(confirm('حذف؟')){sc=sc.filter(function(x){return x.url!==u});ls('shortcuts',JSON.stringify(sc));render()}},700)},{passive:true});
-  el.addEventListener('touchend',function(){clearTimeout(tm)});
-  el.addEventListener('touchmove',function(){clearTimeout(tm)});
-  el.addEventListener('click',function(e){if(!tm||clearTimeout(tm)){location.href=u}});
-})}
+function render(){
+  var h=sc.map(function(s,i){return '<div class="sc-item" data-url="'+s.url+'" data-i="'+i+'"><div class="sc-ico" style="background:'+s.color+'">'+s.icon+'</div><div class="sc-name">'+s.name+'</div></div>'}).join('');
+  h+='<div class="sc-item" id="addBtn"><div class="sc-ico add">＋</div><div class="sc-name">إضافة</div></div>';
+  document.getElementById('sc').innerHTML=h;
+  document.getElementById('addBtn').addEventListener('click',function(e){e.stopPropagation();openModal('addModal')});
+  document.querySelectorAll('.sc-item[data-url]').forEach(function(el){
+    var u=el.getAttribute('data-url');
+    var longPressed=false;
+    var tm=null;
+    el.addEventListener('touchstart',function(){
+      longPressed=false;
+      tm=setTimeout(function(){
+        longPressed=true;
+        if(confirm('حذف هذا الموقع؟')){
+          sc=sc.filter(function(x){return x.url!==u});
+          ls('shortcuts',JSON.stringify(sc));
+          render();
+        }
+      },700);
+    },{passive:true});
+    el.addEventListener('touchend',function(){clearTimeout(tm)});
+    el.addEventListener('touchmove',function(){clearTimeout(tm)});
+    el.addEventListener('click',function(e){
+      if(longPressed){longPressed=false;return}
+      e.preventDefault();
+      e.stopPropagation();
+      location.href=u;
+    });
+  });
+}
 function openModal(id){document.getElementById(id).classList.add('open')}
 function closeModal(id){document.getElementById(id).classList.remove('open')}
 function saveNew(){var n=document.getElementById('newName').value.trim();var u=document.getElementById('newUrl').value.trim();if(!n||!u)return;if(!/^https?:/i.test(u))u='https://'+u;sc.push({name:n,url:u,color:'#8E44AD',icon:n.charAt(0).toUpperCase()});ls('shortcuts',JSON.stringify(sc));document.getElementById('newName').value='';document.getElementById('newUrl').value='';closeModal('addModal');render()}

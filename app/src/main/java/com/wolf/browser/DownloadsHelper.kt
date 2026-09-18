@@ -2,9 +2,12 @@ package com.wolf.browser
 
 import android.app.DownloadManager
 import android.content.Context
+import android.database.Cursor
 import android.net.Uri
 import android.os.Environment
 import android.webkit.MimeTypeMap
+import org.json.JSONArray
+import org.json.JSONObject
 
 object DownloadsHelper {
 
@@ -46,8 +49,58 @@ object DownloadsHelper {
             req.allowScanningByMediaScanner()
             val dm = c.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
             val id = dm.enqueue(req)
-            Storage.addDownload(c, url, name)
+            Storage.addDownload(c, url, name, id)
             id
         } catch(e: Exception) { -1L }
+    }
+
+    // استعلام حالة التنزيلات مع الحجم والتقدم
+    fun queryAll(c: Context): JSONArray {
+        val arr = Storage.getDownloads(c)
+        val result = JSONArray()
+        try {
+            val dm = c.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+            for(i in 0 until arr.length()) {
+                val item = arr.getJSONObject(i)
+                val id = item.optLong("id", -1)
+                val o = JSONObject()
+                o.put("url", item.optString("url"))
+                o.put("filename", item.optString("filename"))
+                o.put("time", item.optLong("time"))
+                if(id > 0) {
+                    val q = DownloadManager.Query().setFilterById(id)
+                    val cur: Cursor? = dm.query(q)
+                    if(cur != null && cur.moveToFirst()) {
+                        val status = cur.getInt(cur.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
+                        val total = cur.getLong(cur.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
+                        val soFar = cur.getLong(cur.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR))
+                        o.put("total", total)
+                        o.put("downloaded", soFar)
+                        o.put("progress", if(total > 0) ((soFar * 100) / total) else 0)
+                        o.put("status", when(status) {
+                            DownloadManager.STATUS_SUCCESSFUL -> "complete"
+                            DownloadManager.STATUS_FAILED -> "failed"
+                            DownloadManager.STATUS_RUNNING -> "running"
+                            DownloadManager.STATUS_PAUSED -> "paused"
+                            DownloadManager.STATUS_PENDING -> "pending"
+                            else -> "unknown"
+                        })
+                    } else {
+                        o.put("status", "unknown")
+                        o.put("total", 0)
+                        o.put("downloaded", 0)
+                        o.put("progress", 0)
+                    }
+                    cur?.close()
+                } else {
+                    o.put("status", "unknown")
+                    o.put("total", 0)
+                    o.put("downloaded", 0)
+                    o.put("progress", 0)
+                }
+                result.put(o)
+            }
+        } catch(e: Exception) {}
+        return result
     }
 }
