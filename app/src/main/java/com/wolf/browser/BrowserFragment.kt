@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.util.Base64
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -22,6 +23,11 @@ import org.mozilla.geckoview.AllowOrDeny
 import org.mozilla.geckoview.GeckoResult
 import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoSession
+import org.mozilla.geckoview.WebResponse
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.net.URL
 
 class BrowserFragment : Fragment() {
     private var _b: FragmentBrowserBinding? = null
@@ -32,7 +38,7 @@ class BrowserFragment : Fragment() {
     private var canFwd = false
     private var curUrl = ""
     private var curTitle = ""
-    private val HOME = "resource://android/assets/home.html"
+    private val HOME get() = "resource://android/assets/home.html"
 
     override fun onCreateView(i: LayoutInflater, c: ViewGroup?, s: Bundle?): View {
         _b = FragmentBrowserBinding.inflate(i, c, false); return b.root
@@ -41,9 +47,13 @@ class BrowserFragment : Fragment() {
     override fun onViewCreated(v: View, s: Bundle?) {
         super.onViewCreated(v, s)
         runtime = GeckoRuntime.create(requireContext())
+        applyRuntimeSettings()
         tabs = TabsManager(runtime)
         createTab(HOME)
+        bindButtons()
+    }
 
+    private fun bindButtons() {
         b.homeBtn.setOnClickListener { loadUrl(HOME) }
         b.bookmarkBtn.setOnClickListener { toggleBookmark() }
         b.menuBtn.setOnClickListener { showMenu(it) }
@@ -59,80 +69,206 @@ class BrowserFragment : Fragment() {
         }
     }
 
+    private fun applyRuntimeSettings() {
+        try {
+            runtime.settings.javaScriptEnabled = Storage.jsEnabled(requireContext())
+        } catch(e: Exception) {}
+    }
+
+    override fun onPause() {
+        super.onPause()
+        try { runtime.setPaused(true) } catch(e: Exception) {}
+    }
+
+    override fun onResume() {
+        super.onResume()
+        try { runtime.setPaused(false) } catch(e: Exception) {}
+        // أعد تطبيق الإعدادات على التبويب النشط
+        applySessionSettings(tabs.activeTab()?.session)
+    }
+
+    private fun applySessionSettings(session: GeckoSession?) {
+        session ?: return
+        try {
+            session.settings.javaScriptEnabled = Storage.jsEnabled(requireContext())
+            session.settings.loadImages = Storage.imagesEnabled(requireContext())
+            session.settings.userAgentMode = if (Storage.desktopMode(requireContext()))
+                GeckoSession.Settings.USER_AGENT_MODE_DESKTOP
+            else
+                GeckoSession.Settings.USER_AGENT_MODE_MOBILE
+        } catch(e: Exception) {}
+    }
+
     private fun createTab(url: String) {
+        val maxT = Storage.maxTabs(requireContext())
+        if (maxT > 0 && tabs.count() >= maxT) tabs.closeTab(0)
         val t = tabs.createTab(url)
         attachSession(t.session)
+        applySessionSettings(t.session)
         b.geckoView.setSession(t.session)
-        updateTabCount(); loadUrl(url)
+        updateTabCount()
+        loadUrl(url)
     }
 
     private fun attachSession(s: GeckoSession) {
+        // ===== Progress =====
         s.progressDelegate = object : GeckoSession.ProgressDelegate {
             override fun onPageStart(sess: GeckoSession, u: String) {
                 if (sess === tabs.activeTab()?.session) {
-                    activity?.runOnUiThread { b.progressBar.visibility = View.VISIBLE; b.progressBar.progress = 0 }
+                    activity?.runOnUiThread {
+                        b.progressBar.visibility = View.VISIBLE
+                        b.progressBar.progress = 0
+                    }
                     curUrl = u; updateUrl(u)
                 }
             }
             override fun onPageStop(sess: GeckoSession, ok: Boolean) {
                 if (sess === tabs.activeTab()?.session) {
                     activity?.runOnUiThread { b.progressBar.visibility = View.GONE }
-                    if (ok && curUrl.isNotBlank()) Storage.addHistory(requireContext(), curUrl, curTitle)
+                    if (ok && curUrl.isNotBlank() && Storage.saveHistory(requireContext()))
+                        Storage.addHistory(requireContext(), curUrl, curTitle)
+                    // حقن مانع الإعلانات بعد انتهاء التحميل
+                    if (Storage.adBlockEnabled(requireContext())) {
+                        try { sess.evaluateJS(AdBlocker.JS) } catch(e: Exception) {}
+                    }
                 }
             }
             override fun onProgressChange(sess: GeckoSession, p: Int) {
-                if (sess === tabs.activeTab()?.session) activity?.runOnUiThread { b.progressBar.progress = p }
+                if (sess === tabs.activeTab()?.session) activity?.runOnUiThread {
+                    b.progressBar.progress = p
+                }
             }
         }
+
+        // ===== Navigation =====
         s.navigationDelegate = object : GeckoSession.NavigationDelegate {
-            override fun onCanGoBack(sess: GeckoSession, ok: Boolean) { if (sess === tabs.activeTab()?.session) canBack = ok }
-            override fun onCanGoForward(sess: GeckoSession, ok: Boolean) { if (sess === tabs.activeTab()?.session) canFwd = ok }
-            override fun onLoadRequest(sess: GeckoSession, req: GeckoSession.NavigationDelegate.LoadRequest): GeckoResult<AllowOrDeny>? {
-                val u = req.uri
-                // wolf:// — داخلي
+            override fun onCanGoBack(sess: GeckoSession, ok: Boolean) {
+                if (sess === tabs.activeTab()?.session) canBack = ok
+            }
+            override fun onCanGoForward(sess: GeckoSession, ok: Boolean) {
+                if (sess === tabs.activeTab()?.session) canFwd = ok
+            }
+
+            override fun onLoadRequest(
+                sess: GeckoSession,
+                req: GeckoSession.NavigationDelegate.LoadRequest
+            ): GeckoResult<AllowOrDeny>? {
+                val u = req.uri ?: return GeckoResult.fromValue(AllowOrDeny.ALLOW)
+
+                // روابط wolf:// داخلية
                 if (u.startsWith("wolf://")) {
                     activity?.runOnUiThread { handleWolf(u) }
                     return GeckoResult.fromValue(AllowOrDeny.DENY)
                 }
-                // intent:// — تطبيقات خارجية
+
+                // intent:// لتطبيقات خارجية
                 if (u.startsWith("intent://")) {
                     try {
-                        val intent = Intent.parseUri(u, Intent.URI_INTENT_SCHEME)
-                        startActivity(intent)
+                        val i = Intent.parseUri(u, Intent.URI_INTENT_SCHEME)
+                        startActivity(i)
                     } catch(e: Exception) {
-                        // جرب الرابط الاحتياطي
                         try {
-                            val fallback = Intent.parseUri(u, Intent.URI_INTENT_SCHEME).getStringExtra("browser_fallback_url")
-                            if(fallback != null) loadUrl(fallback)
+                            val fb = Intent.parseUri(u, Intent.URI_INTENT_SCHEME)
+                                .getStringExtra("browser_fallback_url")
+                            if (fb != null) activity?.runOnUiThread { loadUrl(fb) }
                         } catch(e2: Exception) {}
                     }
                     return GeckoResult.fromValue(AllowOrDeny.DENY)
                 }
-                // تنزيل
+
+                // روابط تنزيل مباشرة
                 if (DownloadsHelper.isDownloadUrl(u)) {
-                    activity?.runOnUiThread { startDl(u, null) }
+                    activity?.runOnUiThread { startDownload(u, null) }
                     return GeckoResult.fromValue(AllowOrDeny.DENY)
                 }
-                // بروتوكولات أخرى (tel:, mailto:, market:, whatsapp://... إلخ)
+
+                // بروتوكولات أخرى (tel:, mailto:, whatsapp:// إلخ)
                 val scheme = try { Uri.parse(u).scheme?.lowercase() } catch(e: Exception) { null }
-                if (scheme != null && scheme !in listOf("http","https","resource","about","file","wolf","jar","data","blob","javascript")) {
+                if (scheme != null && scheme !in listOf(
+                        "http","https","resource","about","file","wolf","jar",
+                        "data","blob","javascript"
+                    )) {
                     try {
                         val i = Intent(Intent.ACTION_VIEW, Uri.parse(u))
                         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         startActivity(i)
                     } catch(e: Exception) {
-                        activity?.runOnUiThread { toast("لا يوجد تطبيق يفتح هذا الرابط") }
+                        activity?.runOnUiThread { toast("لا يوجد تطبيق يفتح هذا") }
                     }
                     return GeckoResult.fromValue(AllowOrDeny.DENY)
                 }
+
                 return GeckoResult.fromValue(AllowOrDeny.ALLOW)
             }
         }
+
+        // ===== Content =====
         s.contentDelegate = object : GeckoSession.ContentDelegate {
             override fun onTitleChange(sess: GeckoSession, title: String?) {
                 curTitle = title ?: ""
-                if (sess === tabs.activeTab()?.session) tabs.updateTab(tabs.activeTab()!!, title = curTitle)
+                if (sess === tabs.activeTab()?.session)
+                    tabs.updateTab(tabs.activeTab()!!, title = curTitle)
             }
+
+            // ★ هنا يحدث التنزيل — الطريقة الرسمية ★
+            override fun onExternalResponse(sess: GeckoSession, response: WebResponse) {
+                val u = response.uri ?: return
+                val cd = response.headers["content-disposition"]
+                    ?: response.headers["Content-Disposition"]
+                val name = DownloadsHelper.guessFilename(u, cd)
+                val body = response.body
+                if (body != null) {
+                    // نكتب الملف من جسم الاستجابة مباشرة (مضمون 100%)
+                    activity?.runOnUiThread { toast("⬇ تنزيل: $name") }
+                    Thread {
+                        try {
+                            val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                            if (!dir.exists()) dir.mkdirs()
+                            val file = File(dir, name)
+                            val out = FileOutputStream(file)
+                            body.use { input ->
+                                val buf = ByteArray(8192)
+                                var n: Int
+                                while (true) {
+                                    n = input.read(buf)
+                                    if (n <= 0) break
+                                    out.write(buf, 0, n)
+                                }
+                            }
+                            out.close()
+                            Storage.addDownload(requireContext(), u, name, 0)
+                            activity?.runOnUiThread { toast("✅ تم التنزيل: $name") }
+                        } catch(e: Exception) {
+                            activity?.runOnUiThread { toast("❌ فشل: ${e.message}") }
+                            // في حال فشل الكتابة المباشرة، نستخدم DownloadManager
+                            try {
+                                DownloadsHelper.start(requireContext(), u, name)
+                            } catch(e2: Exception) {}
+                        }
+                    }.start()
+                } else {
+                    // لا يوجد جسم — نستخدم DownloadManager
+                    try {
+                        val id = DownloadsHelper.start(requireContext(), u, name)
+                        activity?.runOnUiThread {
+                            if (id > 0) toast("✅ بدأ التنزيل: $name")
+                            else toast("❌ فشل التنزيل")
+                        }
+                    } catch(e: Exception) {
+                        activity?.runOnUiThread { toast("❌ ${e.message}") }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun startDownload(u: String, f: String?) {
+        try {
+            val id = DownloadsHelper.start(requireContext(), u, f)
+            if (id > 0) toast("✅ بدأ التنزيل")
+            else toast("❌ فشل — الرابط قد يكون محمياً")
+        } catch(e: Exception) {
+            toast("❌ ${e.message}")
         }
     }
 
@@ -147,8 +283,8 @@ class BrowserFragment : Fragment() {
                 "downloads" -> loadDownloads()
                 "add-bookmark" -> {
                     val url = uri.getQueryParameter("url") ?: return
-                    val title = uri.getQueryParameter("title") ?: ""
-                    Storage.addBookmark(requireContext(), url, title); toast("تم الحفظ")
+                    Storage.addBookmark(requireContext(), url, uri.getQueryParameter("title") ?: "")
+                    toast("تم الحفظ")
                     loadBookmarks()
                 }
                 "remove-bookmark" -> {
@@ -159,88 +295,124 @@ class BrowserFragment : Fragment() {
                     Storage.removeHistoryItem(requireContext(), uri.getQueryParameter("url") ?: return)
                     loadHistory()
                 }
-                "clear-history" -> { Storage.clearHistory(requireContext()); toast("تم مسح السجل"); loadHistory() }
-                "clear-bookmarks" -> { Storage.clearBookmarks(requireContext()); toast("تم مسح المفضلة"); loadBookmarks() }
-                "clear-downloads" -> { Storage.clearDownloads(requireContext()); toast("تم المسح"); loadDownloads() }
-                "clear-all" -> { Storage.clearAll(requireContext()); toast("تم مسح كل شيء") }
+                "clear-history" -> { Storage.clearHistory(requireContext()); loadHistory() }
+                "clear-bookmarks" -> { Storage.clearBookmarks(requireContext()); loadBookmarks() }
+                "clear-downloads" -> { Storage.clearDownloads(requireContext()); loadDownloads() }
+                "clear-all" -> { Storage.clearAll(requireContext()); toast("تم") }
+                "ad-stats" -> {
+                    val n = uri.getQueryParameter("count")?.toIntOrNull() ?: 0
+                    if (n > 0) Storage.addAdsBlocked(requireContext(), n)
+                }
+                "settings-changed" -> applySessionSettings(tabs.activeTab()?.session)
+                "clear-cache" -> {
+                    try { runtime.clearCaches(); toast("تم مسح الذاكرة") } catch(e: Exception) {}
+                }
+                "reset-ads" -> { Storage.resetAdsBlocked(requireContext()); toast("تم") }
                 "export" -> exportSync()
                 "import" -> showImport()
             }
         } catch (e: Exception) { toast("خطأ: ${e.message}") }
     }
 
-    private fun startDl(u: String, f: String?) {
-        val id = DownloadsHelper.start(requireContext(), u, f)
-        toast(if (id > 0) "بدأ التنزيل في الخلفية" else "فشل بدء التنزيل")
+    private fun loadBookmarks() {
+        val d = Storage.getBookmarks(requireContext()).toString()
+        loadUrl("resource://android/assets/bookmarks.html?d=${enc(d)}")
     }
-
-    private fun loadBookmarks() { loadUrl("resource://android/assets/bookmarks.html?d=${enc(Storage.getBookmarks(requireContext()).toString())}") }
-    private fun loadHistory() { loadUrl("resource://android/assets/history.html?d=${enc(Storage.getHistory(requireContext()).toString())}") }
+    private fun loadHistory() {
+        val d = Storage.getHistory(requireContext()).toString()
+        loadUrl("resource://android/assets/history.html?d=${enc(d)}")
+    }
     private fun loadDownloads() {
-        val realData = DownloadsHelper.queryAll(requireContext()).toString()
-        loadUrl("resource://android/assets/downloads.html?d=${enc(realData)}")
+        val d = DownloadsHelper.queryAll(requireContext()).toString()
+        loadUrl("resource://android/assets/downloads.html?d=${enc(d)}")
     }
     private fun enc(s: String) = Base64.encodeToString(s.toByteArray(), Base64.NO_WRAP or Base64.URL_SAFE)
 
     private fun toggleBookmark() {
-        if (curUrl.isBlank() || curUrl.startsWith("resource://") || curUrl.startsWith("about:") || curUrl.startsWith("jar:")) { toast("لا يمكن حفظ هذه الصفحة"); return }
-        if (Storage.isBookmarked(requireContext(), curUrl)) { Storage.removeBookmark(requireContext(), curUrl); toast("تم الحذف") }
-        else { Storage.addBookmark(requireContext(), curUrl, curTitle); toast("تم الحفظ") }
+        if (curUrl.isBlank() || curUrl.startsWith("resource://") || curUrl.startsWith("about:") || curUrl.startsWith("jar:")) {
+            toast("لا يمكن حفظ هذه الصفحة"); return
+        }
+        if (Storage.isBookmarked(requireContext(), curUrl)) {
+            Storage.removeBookmark(requireContext(), curUrl); toast("تم الحذف")
+        } else {
+            Storage.addBookmark(requireContext(), curUrl, curTitle); toast("تم الحفظ")
+        }
     }
 
     private fun showTabs() {
         val list = tabs.allTabs()
-        val items = list.mapIndexed { i, t -> (if (i == tabs.activeIndex()) "▶ " else "   ") + t.title.take(40) }.toTypedArray()
+        val items = list.mapIndexed { i, t ->
+            (if (i == tabs.activeIndex()) "▶ " else "   ") + t.title.take(40)
+        }.toTypedArray()
         AlertDialog.Builder(requireContext())
             .setTitle("التبويبات (${list.size})")
             .setItems(items) { _, w -> switchTab(w) }
-            .setPositiveButton("تبويب جديد") { _, _ -> createTab(HOME) }
+            .setPositiveButton("جديد") { _, _ -> createTab(HOME) }
             .setNeutralButton("حذف الحالي") { _, _ ->
                 tabs.closeTab(tabs.activeIndex())
-                tabs.activeTab()?.let { attachSession(it.session); b.geckoView.setSession(it.session); loadUrl(it.url); updateTabCount() }
+                tabs.activeTab()?.let {
+                    attachSession(it.session)
+                    b.geckoView.setSession(it.session)
+                    loadUrl(it.url)
+                    updateTabCount()
+                }
             }
             .setNegativeButton("إغلاق", null).show()
     }
 
     private fun switchTab(i: Int) {
+        try { tabs.activeTab()?.session?.setActive(false) } catch(e: Exception) {}
         val t = tabs.setActive(i) ?: return
-        b.geckoView.setSession(t.session); loadUrl(t.url); updateTabCount(); updateUrl(t.url)
+        try { t.session.setActive(true) } catch(e: Exception) {}
+        applySessionSettings(t.session)
+        b.geckoView.setSession(t.session)
+        updateTabCount()
+        updateUrl(t.url)
     }
 
     private fun updateTabCount() { b.tabsBtn.text = "📑 ${tabs.count()}" }
 
     private fun showSync() {
-        val opts = arrayOf("☁ تصدير البيانات", "📥 استيراد البيانات", "🔗 نسخ كود المزامنة")
+        val opts = arrayOf("☁ تصدير", "📥 استيراد", "🔗 نسخ كود")
         AlertDialog.Builder(requireContext()).setTitle("المزامنة").setItems(opts) { _, w ->
-            when (w) { 0 -> exportSync(); 1 -> showImport(); 2 -> copyCode() }
+            when (w) {
+                0 -> exportSync()
+                1 -> showImport()
+                2 -> { copyToClip(SyncManager.exportBase64(requireContext())); toast("تم النسخ") }
+            }
         }.show()
     }
 
     private fun exportSync() {
         val json = SyncManager.exportJson(requireContext())
         AlertDialog.Builder(requireContext())
-            .setTitle("تصدير البيانات")
-            .setMessage("احفظ هذا النص:")
-            .setNeutralButton("نسخ") { _, _ -> copyToClip(json); toast("تم النسخ") }
+            .setTitle("تصدير البيانات").setMessage("احفظ هذا النص:")
+            .setNeutralButton("نسخ") { _, _ -> copyToClip(json); toast("تم") }
             .setPositiveButton("مشاركة") { _, _ ->
-                val i = Intent(Intent.ACTION_SEND).apply { type = "text/plain"; putExtra(Intent.EXTRA_TEXT, json) }
+                val i = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"; putExtra(Intent.EXTRA_TEXT, json)
+                }
                 startActivity(Intent.createChooser(i, "مشاركة"))
             }
             .setNegativeButton("إغلاق", null).show()
     }
 
     private fun showImport() {
-        val inp = EditText(requireContext()).apply { hint = "الصق كود المزامنة"; setPadding(30,30,30,30) }
-        AlertDialog.Builder(requireContext()).setTitle("استيراد البيانات").setView(inp)
+        val inp = EditText(requireContext()).apply {
+            hint = "الصق كود المزامنة"; setPadding(30, 30, 30, 30)
+        }
+        AlertDialog.Builder(requireContext())
+            .setTitle("استيراد").setView(inp)
             .setPositiveButton("استيراد") { _, _ ->
                 val t = inp.text.toString().trim()
-                if (t.isBlank()) { toast("لا يوجد نص"); return@setPositiveButton }
-                val ok = if (t.startsWith("{")) SyncManager.importJson(requireContext(), t) else SyncManager.importBase64(requireContext(), t)
-                toast(if (ok) "تم الاستيراد" else "فشل")
-            }.setNegativeButton("إلغاء", null).show()
+                if (t.isBlank()) { toast("لا يوجد"); return@setPositiveButton }
+                val ok = if (t.startsWith("{")) SyncManager.importJson(requireContext(), t)
+                         else SyncManager.importBase64(requireContext(), t)
+                toast(if (ok) "تم" else "فشل")
+            }
+            .setNegativeButton("إلغاء", null).show()
     }
 
-    private fun copyCode() { copyToClip(SyncManager.exportBase64(requireContext())); toast("تم النسخ") }
     private fun copyToClip(s: String) {
         val cm = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         cm.setPrimaryClip(ClipData.newPlainText("wolf", s))
@@ -248,32 +420,43 @@ class BrowserFragment : Fragment() {
 
     private fun doSearch(q: String) {
         val x = q.trim(); if (x.isEmpty()) return
+        val engine = Storage.searchEngine(requireContext())
+        val engineUrl = when(engine) {
+            "bing" -> "https://www.bing.com/search?q="
+            "ddg" -> "https://duckduckgo.com/?q="
+            "yandex" -> "https://yandex.com/search/?text="
+            else -> "https://www.google.com/search?q="
+        }
         val u = when {
             x.startsWith("http://") || x.startsWith("https://") -> x
             x.matches(Regex("^[a-z0-9.-]+\\.[a-z]{2,}(/.*)?$", RegexOption.IGNORE_CASE)) -> "https://$x"
-            else -> "https://www.google.com/search?q=" + Uri.encode(x)
+            else -> engineUrl + Uri.encode(x)
         }
         loadUrl(u)
     }
 
     private fun updateUrl(u: String) = activity?.runOnUiThread {
-        if (u.startsWith("resource://") || u.startsWith("file://") || u.startsWith("jar:")) { b.urlBar.setText(""); b.urlBar.hint = "ابحث..." }
-        else b.urlBar.setText(u)
+        if (u.startsWith("resource://") || u.startsWith("file://") || u.startsWith("jar:")) {
+            b.urlBar.setText(""); b.urlBar.hint = "ابحث..."
+        } else b.urlBar.setText(u)
     }
 
     private fun showMenu(anchor: View) {
         val p = PopupMenu(requireContext(), anchor)
-        p.menu.add(0,1,0,"🏠 الرئيسية")
-        p.menu.add(0,2,1,"⭐ المفضلة")
-        p.menu.add(0,3,2,"🕘 السجل")
-        p.menu.add(0,4,3,"⬇ التنزيلات")
-        p.menu.add(0,5,4,"🌐 الترجمة")
-        p.menu.add(0,6,5,"☁ المزامنة")
-        p.menu.add(0,7,6,"⚙ الإعدادات")
-        p.menu.add(0,8,7,"ℹ حول")
+        p.menu.add(0, 1, 0, "🏠 الرئيسية")
+        p.menu.add(0, 2, 1, "⭐ المفضلة")
+        p.menu.add(0, 3, 2, "🕘 السجل")
+        p.menu.add(0, 4, 3, "⬇ التنزيلات")
+        p.menu.add(0, 5, 4, "🌐 الترجمة")
+        p.menu.add(0, 6, 5, "☁ المزامنة")
+        p.menu.add(0, 7, 6, "⚙ الإعدادات")
+        p.menu.add(0, 8, 7, "ℹ حول")
         p.setOnMenuItemClickListener { it ->
             when (it.itemId) {
-                1 -> loadUrl(HOME); 2 -> loadBookmarks(); 3 -> loadHistory(); 4 -> loadDownloads()
+                1 -> loadUrl(HOME)
+                2 -> loadBookmarks()
+                3 -> loadHistory()
+                4 -> loadDownloads()
                 5 -> loadUrl("resource://android/assets/translate.html")
                 6 -> showSync()
                 7 -> loadUrl("resource://android/assets/settings.html")
@@ -282,7 +465,9 @@ class BrowserFragment : Fragment() {
         }; p.show()
     }
 
-    private fun toast(m: String) = activity?.runOnUiThread { Toast.makeText(requireContext(), m, Toast.LENGTH_SHORT).show() }
+    private fun toast(m: String) = activity?.runOnUiThread {
+        try { Toast.makeText(requireContext(), m, Toast.LENGTH_LONG).show() } catch(e: Exception) {}
+    }
 
     fun canGoBack() = canBack
     fun canGoForward() = canFwd

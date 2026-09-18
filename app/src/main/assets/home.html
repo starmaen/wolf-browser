@@ -1,39 +1,39 @@
 <!DOCTYPE html><html lang="ar" dir="rtl"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{--bg:#0B1929;--surface:#0F2233;--card:#132A3E;--card2:#183348;--primary:#4FC3F7;--text:#E8EEF4;--text-sec:rgba(232,238,244,.55);--border:rgba(79,195,247,.15);--on-primary:#00222E}
-body.light{--bg:#F0F4F8;--surface:#FFF;--card:#E1E8F0;--card2:#D0DAE5;--primary:#0288D1;--text:#0B1929;--text-sec:rgba(11,25,41,.6);--border:rgba(2,136,209,.2);--on-primary:#FFF}
+:root{--bg:#0B1929;--surface:#0F2233;--card:#132A3E;--card2:#183348;--primary:#4FC3F7;--text:#E8EEF4;--text-sec:rgba(232,238,244,.55);--border:rgba(79,195,247,.15)}
+body.light{--bg:#F0F4F8;--surface:#FFF;--card:#E1E8F0;--card2:#D0DAE5;--primary:#0288D1;--text:#0B1929;--text-sec:rgba(11,25,41,.6);--border:rgba(2,136,209,.2)}
 body{font-family:-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:0 14px 30px;overflow-x:hidden}
 .hero{display:flex;flex-direction:column;align-items:center;padding:24px 0 18px;gap:10px}
-.logo-ring{width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--card2));padding:3px}
-.logo-inner{width:100%;height:100%;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:58px}
+.logo-ring{width:110px;height:110px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--card2));padding:3px}
+.logo-inner{width:100%;height:100%;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:54px}
 .app-name{font-size:20px;font-weight:800;color:var(--text)}
 .app-name .en{color:var(--primary);font-size:14px;margin-inline-start:6px}
-.search-wrap{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:50px;padding:4px 6px 4px 14px;height:50px;margin-top:8px}
+.search-wrap{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:50px;padding:4px 6px 4px 14px;height:52px;margin-top:10px}
 .search-input{flex:1;font-size:15px;color:var(--text);background:none;border:none;outline:none;padding:0 8px;min-width:0}
 .search-input::placeholder{color:var(--text-sec)}
-.engine-btn{display:flex;align-items:center;gap:5px;background:var(--card2);border-radius:50px;padding:5px 9px;height:38px;cursor:pointer;flex-shrink:0}
-.engine-dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#fff}
-.engine-arrow{font-size:10px;color:var(--primary)}
-.section-title{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--text-sec);margin:20px 4px 10px}
-.shortcuts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.sc-item{display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 2px;border-radius:12px;text-decoration:none;color:inherit;cursor:pointer;user-select:none}
-.sc-ico{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;pointer-events:none}
+.engine-btn{display:flex;align-items:center;gap:5px;background:var(--card2);border-radius:50px;padding:6px 10px;height:40px;cursor:pointer;flex-shrink:0}
+.engine-dot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff}
+.section-title{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--text-sec);margin:20px 4px 12px}
+.shortcuts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.sc-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px 4px;border-radius:14px;cursor:pointer;min-height:90px;transition:background .12s}
+.sc-item:active{background:var(--surface)}
+.sc-ico{width:54px;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;pointer-events:none}
 .sc-ico.add{background:var(--surface);border:2px dashed var(--primary);color:var(--primary)}
-.sc-name{font-size:10px;color:var(--text-sec);text-align:center;max-width:68px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none}
-.hint{font-size:10px;color:var(--text-sec);text-align:center;padding:12px 10px;opacity:.6}
+.sc-name{font-size:10px;color:var(--text-sec);text-align:center;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none}
+.hint{font-size:10px;color:var(--text-sec);text-align:center;padding:14px 10px;opacity:.6}
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center;z-index:100}
 .modal-bg.open{display:flex}
 .modal{background:var(--bg);width:100%;max-width:600px;border-radius:20px 20px 0 0;padding:20px 18px 24px;border-top:1px solid var(--border)}
-.modal h3{font-size:16px;font-weight:700;margin-bottom:14px;text-align:center;color:var(--text)}
-.eng-opt{display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:7px;cursor:pointer}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:14px;text-align:center}
+.eng-opt{display:flex;align-items:center;gap:12px;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;cursor:pointer}
 .eng-opt.selected{border-color:var(--primary);background:var(--card2)}
 .eng-opt .dot{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:15px}
-.eng-opt .nm{flex:1;font-weight:600;color:var(--text)}
+.eng-opt .nm{flex:1;font-weight:600}
 .eng-opt .ck{color:var(--primary);font-size:17px}
-.inp{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px;color:var(--text);font-size:14px;outline:none;margin-bottom:9px;font-family:inherit}
-.btn{width:100%;padding:13px;border-radius:12px;background:var(--primary);color:var(--on-primary);font-weight:700;font-size:14px;border:none;cursor:pointer;margin-top:5px}
+.inp{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;color:var(--text);font-size:15px;outline:none;margin-bottom:10px;font-family:inherit}
+.btn{width:100%;padding:14px;border-radius:12px;background:var(--primary);color:#00222E;font-weight:700;font-size:15px;border:none;cursor:pointer;margin-top:6px}
 .btn.ghost{background:var(--surface);color:var(--text);border:1px solid var(--border)}
 </style></head><body>
 <div class="hero">
@@ -41,61 +41,88 @@ body{font-family:-apple-system,sans-serif;background:var(--bg);color:var(--text)
   <div class="app-name">الذئب <span class="en">Wolf</span></div>
 </div>
 <div class="search-wrap">
-  <span style="font-size:17px;opacity:.6">🔍</span>
-  <input class="search-input" id="q" type="text" placeholder="ابحث أو اكتب عنواناً..." autocomplete="off">
-  <div class="engine-btn" id="engineBtn"><span class="engine-dot" id="engineDot" style="background:#4285F4">G</span><span class="engine-arrow">▾</span></div>
+  <span style="font-size:18px;opacity:.6">🔍</span>
+  <input class="search-input" id="q" type="text" placeholder="ابحث أو اكتب عنواناً..." autocomplete="off" onkeydown="if(event.key==='Enter'){doSearch();return false}">
+  <div class="engine-btn" onclick="openEng()"><span class="engine-dot" id="engineDot" style="background:#4285F4">G</span><span style="color:var(--primary);font-size:10px">▾</span></div>
 </div>
 <div class="section-title">المواقع السريعة</div>
 <div class="shortcuts" id="sc"></div>
 <div class="hint">اضغط مطولاً على أي أيقونة لحذفها</div>
-<div class="modal-bg" id="engModal"><div class="modal"><h3>محرك البحث</h3><div id="engList"></div><button class="btn ghost" onclick="closeModal('engModal')">إغلاق</button></div></div>
-<div class="modal-bg" id="addModal"><div class="modal"><h3>إضافة موقع</h3><input class="inp" id="newName" placeholder="الاسم"><input class="inp" id="newUrl" placeholder="https://..." style="direction:ltr;text-align:left"><button class="btn" onclick="saveNew()">حفظ</button><button class="btn ghost" onclick="closeModal('addModal')">إلغاء</button></div></div>
+<div class="modal-bg" id="engModal" onclick="if(event.target===this)closeModal('engModal')"><div class="modal"><h3>محرك البحث</h3><div id="engList"></div><button class="btn ghost" onclick="closeModal('engModal')">إغلاق</button></div></div>
+<div class="modal-bg" id="addModal" onclick="if(event.target===this)closeModal('addModal')"><div class="modal"><h3>إضافة موقع</h3><input class="inp" id="newName" placeholder="الاسم"><input class="inp" id="newUrl" placeholder="https://..." style="direction:ltr;text-align:left"><button class="btn" onclick="saveNew()">حفظ</button><button class="btn ghost" onclick="closeModal('addModal')">إلغاء</button></div></div>
 <script>
 var ENGINES={google:{name:'Google',url:'https://www.google.com/search?q=',color:'#4285F4',letter:'G'},bing:{name:'Bing',url:'https://www.bing.com/search?q=',color:'#008373',letter:'b'},ddg:{name:'DuckDuckGo',url:'https://duckduckgo.com/?q=',color:'#DE5833',letter:'D'},yandex:{name:'Yandex',url:'https://yandex.com/search/?text=',color:'#FC3F1D',letter:'Y'}};
 var DEFAULT=[{name:'YouTube',url:'https://youtube.com',color:'#FF0000',icon:'▶'},{name:'Telegram',url:'https://web.telegram.org',color:'#229ED9',icon:'✈'},{name:'WhatsApp',url:'https://web.whatsapp.com',color:'#25D366',icon:'✆'},{name:'Facebook',url:'https://facebook.com',color:'#1877F2',icon:'f'},{name:'X',url:'https://x.com',color:'#0A0A0A',icon:'𝕏'},{name:'GitHub',url:'https://github.com',color:'#24292E',icon:'⎔'},{name:'XDA',url:'https://xda-developers.com',color:'#FF6E00',icon:'X'}];
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
-var curEng=ls('engine')||'google';var theme=ls('theme')||'dark';
+var curEng=ls('engine')||'google';
 var sc;try{sc=JSON.parse(ls('shortcuts')||'null')||DEFAULT.slice()}catch(e){sc=DEFAULT.slice()}
-if(theme==='light')document.body.classList.add('light');
+if((ls('theme')||'dark')==='light')document.body.classList.add('light');
 function updateEng(){var e=ENGINES[curEng];var d=document.getElementById('engineDot');d.textContent=e.letter;d.style.background=e.color}
+
+// ★ استخدام وظيفة عالمية مفردة للأيقونات
+window.__wolf_open=function(url){ window.location.href = url; };
+window.__wolf_del=function(url){
+  if(confirm('حذف هذا الموقع؟')){
+    sc=sc.filter(function(x){return x.url!==url});
+    ls('shortcuts',JSON.stringify(sc));
+    render();
+  }
+};
+
 function render(){
-  var h=sc.map(function(s,i){return '<div class="sc-item" data-url="'+s.url+'" data-i="'+i+'"><div class="sc-ico" style="background:'+s.color+'">'+s.icon+'</div><div class="sc-name">'+s.name+'</div></div>'}).join('');
-  h+='<div class="sc-item" id="addBtn"><div class="sc-ico add">＋</div><div class="sc-name">إضافة</div></div>';
+  var h='';
+  for(var i=0;i<sc.length;i++){
+    var s=sc[i];
+    h+='<div class="sc-item" '+
+      'onclick="window.__wolf_open(\''+s.url.replace(/'/g,"\\'")+'\')" '+
+      'ontouchstart="window.__wolf_ts(event,\''+s.url.replace(/'/g,"\\'")+'\')" '+
+      'ontouchend="window.__wolf_te()" '+
+      'ontouchmove="window.__wolf_tm()">'+
+      '<div class="sc-ico" style="background:'+s.color+'">'+s.icon+'</div>'+
+      '<div class="sc-name">'+s.name+'</div>'+
+    '</div>';
+  }
+  h+='<div class="sc-item" onclick="openModal(\'addModal\')"><div class="sc-ico add">＋</div><div class="sc-name">إضافة</div></div>';
   document.getElementById('sc').innerHTML=h;
-  document.getElementById('addBtn').addEventListener('click',function(e){e.stopPropagation();openModal('addModal')});
-  document.querySelectorAll('.sc-item[data-url]').forEach(function(el){
-    var u=el.getAttribute('data-url');
-    var longPressed=false;
-    var tm=null;
-    el.addEventListener('touchstart',function(){
-      longPressed=false;
-      tm=setTimeout(function(){
-        longPressed=true;
-        if(confirm('حذف هذا الموقع؟')){
-          sc=sc.filter(function(x){return x.url!==u});
-          ls('shortcuts',JSON.stringify(sc));
-          render();
-        }
-      },700);
-    },{passive:true});
-    el.addEventListener('touchend',function(){clearTimeout(tm)});
-    el.addEventListener('touchmove',function(){clearTimeout(tm)});
-    el.addEventListener('click',function(e){
-      if(longPressed){longPressed=false;return}
-      e.preventDefault();
-      e.stopPropagation();
-      location.href=u;
-    });
-  });
 }
+var _t=null,_lp=false;
+window.__wolf_ts=function(e,url){_lp=false;if(_t)clearTimeout(_t);_t=setTimeout(function(){_lp=true;window.__wolf_del(url)},700)};
+window.__wolf_te=function(){if(_t){clearTimeout(_t);_t=null}};
+window.__wolf_tm=function(){if(_t){clearTimeout(_t);_t=null}};
+
 function openModal(id){document.getElementById(id).classList.add('open')}
 function closeModal(id){document.getElementById(id).classList.remove('open')}
-function saveNew(){var n=document.getElementById('newName').value.trim();var u=document.getElementById('newUrl').value.trim();if(!n||!u)return;if(!/^https?:/i.test(u))u='https://'+u;sc.push({name:n,url:u,color:'#8E44AD',icon:n.charAt(0).toUpperCase()});ls('shortcuts',JSON.stringify(sc));document.getElementById('newName').value='';document.getElementById('newUrl').value='';closeModal('addModal');render()}
-function openEng(){var h=Object.keys(ENGINES).map(function(k){var e=ENGINES[k];var s=k===curEng?' selected':'';var c=k===curEng?'<div class="ck">✓</div>':'';return '<div class="eng-opt'+s+'" onclick="setEng(\''+k+'\')"><div class="dot" style="background:'+e.color+'">'+e.letter+'</div><div class="nm">'+e.name+'</div>'+c+'</div>'}).join('');document.getElementById('engList').innerHTML=h;openModal('engModal')}
+function saveNew(){
+  var n=document.getElementById('newName').value.trim();
+  var u=document.getElementById('newUrl').value.trim();
+  if(!n||!u)return;
+  if(!/^https?:/i.test(u))u='https://'+u;
+  sc.push({name:n,url:u,color:'#8E44AD',icon:n.charAt(0).toUpperCase()});
+  ls('shortcuts',JSON.stringify(sc));
+  document.getElementById('newName').value='';
+  document.getElementById('newUrl').value='';
+  closeModal('addModal');
+  render();
+}
+function openEng(){
+  var h='';var ks=Object.keys(ENGINES);
+  for(var i=0;i<ks.length;i++){
+    var k=ks[i];var e=ENGINES[k];
+    var sel=k===curEng?' selected':'';
+    var ck=k===curEng?'<div class="ck">✓</div>':'';
+    h+='<div class="eng-opt'+sel+'" onclick="setEng(\''+k+'\')"><div class="dot" style="background:'+e.color+'">'+e.letter+'</div><div class="nm">'+e.name+'</div>'+ck+'</div>';
+  }
+  document.getElementById('engList').innerHTML=h;
+  openModal('engModal');
+}
 function setEng(k){curEng=k;ls('engine',k);updateEng();closeModal('engModal')}
-document.getElementById('engineBtn').onclick=openEng;
-document.getElementById('engModal').onclick=function(e){if(e.target===this)closeModal('engModal')};
-document.getElementById('addModal').onclick=function(e){if(e.target===this)closeModal('addModal')};
-document.getElementById('q').addEventListener('keydown',function(e){if(e.key!=='Enter')return;var q=this.value.trim();if(!q)return;var u;if(/^https?:\/\//i.test(q))u=q;else if(/^[a-z0-9.-]+\.[a-z]{2,}(\/.*)?$/i.test(q))u='https://'+q;else u=ENGINES[curEng].url+encodeURIComponent(q);location.href=u});
+function doSearch(){
+  var q=document.getElementById('q').value.trim();if(!q)return;
+  var u;
+  if(/^https?:\/\//i.test(q))u=q;
+  else if(/^[a-z0-9.-]+\.[a-z]{2,}(\/.*)?$/i.test(q))u='https://'+q;
+  else u=ENGINES[curEng].url+encodeURIComponent(q);
+  window.location.href=u;
+}
 updateEng();render();
 </script></body></html>
