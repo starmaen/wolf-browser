@@ -96,9 +96,6 @@ class BrowserFragment : Fragment() {
                 curTitle = title ?: ""
                 if (sess === tabs.activeTab()?.session) tabs.updateTab(tabs.activeTab()!!, title = curTitle)
             }
-            override fun onExternalResponse(sess: GeckoSession, r: GeckoSession.WebResponseInfo) {
-                startDl(r.uri, r.filename)
-            }
         }
     }
 
