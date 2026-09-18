@@ -1,34 +1,17 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<style>
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0B1929;--primary:#4FC3F7;--text:#E8EEF4;--text-sec:rgba(232,238,244,0.55)}
-body.light{--bg:#F0F4F8;--primary:#0288D1;--text:#0B1929;--text-sec:rgba(11,25,41,0.6)}
+:root{--bg:#0B1929;--primary:#4FC3F7;--text:#E8EEF4;--text-sec:rgba(232,238,244,.55)}
+body.light{--bg:#F0F4F8;--primary:#0288D1;--text:#0B1929;--text-sec:rgba(11,25,41,.6)}
 body{font-family:-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:16px 14px}
-.back{display:inline-flex;color:var(--primary);text-decoration:none;font-size:15px;padding:10px 0;margin-bottom:10px}
-h1{font-size:22px;font-weight:800;margin-bottom:20px}
-.about{text-align:center;padding:30px 20px}
-.about .logo{width:100px;height:100px;border-radius:50%;margin:0 auto 16px;background:linear-gradient(135deg,#4FC3F7,#00E5FF);display:flex;align-items:center;justify-content:center;font-size:56px;box-shadow:0 8px 30px rgba(79,195,247,0.3)}
-.about h2{font-size:22px;font-weight:800}
-.about .v{font-size:12px;color:var(--text-sec);margin-top:4px}
-.about p{font-size:13px;line-height:1.7;color:var(--text-sec);padding:20px 10px}
-</style>
-</head>
-<body>
-<a class="back" href="resource://android/assets/home.html">→ الرئيسية</a>
-<h1>حول التطبيق</h1>
-<div class="about">
-  <div class="logo">🐺</div>
-  <h2>Wolf Browser</h2>
-  <div class="v">v1.0.0</div>
-  <p>متصفح الذئب - متصفح أندرويد مجاني بمحرك فايرفوكس (GeckoView). يدعم العربية والإنجليزية، مع واجهة كحلية مريحة للعين.</p>
-</div>
+.back{color:var(--primary);text-decoration:none;font-size:15px;display:inline-block;padding:10px 0;margin-bottom:10px}
+h1{font-size:20px;font-weight:800;margin-bottom:16px}
+.ab{text-align:center;padding:30px 20px}
+.lg{width:100px;height:100px;border-radius:50%;margin:0 auto 16px;background:linear-gradient(135deg,#4FC3F7,#00E5FF);display:flex;align-items:center;justify-content:center;font-size:56px}
+.ab h2{font-size:22px;font-weight:800}.ab .v{font-size:12px;color:var(--text-sec);margin-top:4px}
+.ab p{font-size:13px;line-height:1.7;color:var(--text-sec);padding:20px 10px}
+</style></head><body>
+<a class="back" href="resource://android/assets/home.html">→ الرئيسية</a><h1>ℹ حول</h1>
+<div class="ab"><div class="lg">🐺</div><h2>Wolf Browser</h2><div class="v">v1.0.0</div><p>متصفح الذئب - متصفح أندرويد بمحرك فايرفوكس (GeckoView) مع دعم التبويبات والتنزيلات والمزامنة.</p></div>
 <script>
-function ls(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
-if((ls('theme') || 'dark') === 'light') document.body.classList.add('light');
-</script>
-</body>
-</html>
+try{if((localStorage.getItem('theme')||'dark')==='light')document.body.classList.add('light')}catch(e){}
+</script></body></html>

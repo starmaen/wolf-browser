@@ -1,184 +1,250 @@
 package com.wolf.browser
 
 import android.app.AlertDialog
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Base64
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.widget.EditText
 import android.widget.PopupMenu
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.wolf.browser.databinding.FragmentBrowserBinding
+import org.mozilla.geckoview.AllowOrDeny
+import org.mozilla.geckoview.GeckoResult
 import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoSession
-import org.mozilla.geckoview.GeckoView
 
 class BrowserFragment : Fragment() {
-
-    private var _binding: FragmentBrowserBinding? = null
-    private val binding get() = _binding!!
-
-    private lateinit var session: GeckoSession
+    private var _b: FragmentBrowserBinding? = null
+    private val b get() = _b!!
     private lateinit var runtime: GeckoRuntime
+    private lateinit var tabs: TabsManager
+    private var canBack = false
+    private var canFwd = false
+    private var curUrl = ""
+    private var curTitle = ""
+    private val HOME = "resource://android/assets/home.html"
 
-    private val HOME_URL = "resource://android/assets/home.html"
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, saved: Bundle?
-    ): View {
-        _binding = FragmentBrowserBinding.inflate(inflater, container, false)
-        return binding.root
+    override fun onCreateView(i: LayoutInflater, c: ViewGroup?, s: Bundle?): View {
+        _b = FragmentBrowserBinding.inflate(i, c, false); return b.root
     }
 
-    override fun onViewCreated(view: View, saved: Bundle?) {
-        super.onViewCreated(view, saved)
-
+    override fun onViewCreated(v: View, s: Bundle?) {
+        super.onViewCreated(v, s)
         runtime = GeckoRuntime.create(requireContext())
-        session = GeckoSession()
-        session.open(runtime)
+        tabs = TabsManager(runtime)
+        createTab(HOME)
 
-        session.progressDelegate = object : GeckoSession.ProgressDelegate {
-            override fun onPageStart(session: GeckoSession, url: String) {
-                showProgress()
-                updateUrlBar(url)
-            }
-            override fun onPageStop(session: GeckoSession, success: Boolean) {
-                hideProgress()
-            }
-            override fun onProgressChange(session: GeckoSession, progress: Int) {
-                setProgress(progress)
-            }
-        }
+        b.homeBtn.setOnClickListener { loadUrl(HOME) }
+        b.bookmarkBtn.setOnClickListener { toggleBookmark() }
+        b.menuBtn.setOnClickListener { showMenu(it) }
+        b.backBtn.setOnClickListener { if (canBack) tabs.activeTab()?.session?.goBack() }
+        b.fwdBtn.setOnClickListener { if (canFwd) tabs.activeTab()?.session?.goForward() }
+        b.tabsBtn.setOnClickListener { showTabs() }
+        b.newTabBtn.setOnClickListener { createTab(HOME) }
+        b.syncBtn.setOnClickListener { showSync() }
 
-        binding.geckoView.setSession(session)
-        session.loadUri(HOME_URL)
-
-        binding.homeBtn.setOnClickListener {
-            session.loadUri(HOME_URL)
-        }
-
-        binding.transBtn.setOnClickListener {
-            session.loadUri("resource://android/assets/translate.html")
-        }
-
-        binding.menuBtn.setOnClickListener { v ->
-            showMainMenu(v)
-        }
-
-        binding.urlBar.setOnEditorActionListener { _, actionId, event ->
-            val isEnter = event?.keyCode == KeyEvent.KEYCODE_ENTER &&
-                    event.action == KeyEvent.ACTION_DOWN
-            if (actionId == EditorInfo.IME_ACTION_GO || isEnter) {
-                doSearch(binding.urlBar.text.toString())
-                true
-            } else false
+        b.urlBar.setOnEditorActionListener { _, a, e ->
+            val enter = e?.keyCode == KeyEvent.KEYCODE_ENTER && e.action == KeyEvent.ACTION_DOWN
+            if (a == EditorInfo.IME_ACTION_GO || enter) { doSearch(b.urlBar.text.toString()); true } else false
         }
     }
 
-    fun canGoBack(): Boolean = try { session.canGoBack() } catch (e: Exception) { false }
-    fun canGoForward(): Boolean = try { session.canGoForward() } catch (e: Exception) { false }
-    fun goBack() { try { session.goBack() } catch (e: Exception) {} }
-    fun goForward() { try { session.goForward() } catch (e: Exception) {} }
-    fun reload() { try { session.reload() } catch (e: Exception) {} }
-    fun stopLoad() { try { session.stop() } catch (e: Exception) {} }
-    fun goHome() { try { session.loadUri(HOME_URL) } catch (e: Exception) {} }
-
-    fun currentUrl(): String = try {
-        session.progressDelegate?.let { "" } ?: ""
-        binding.urlBar.text.toString()
-    } catch (e: Exception) { "" }
-
-    private fun doSearch(query: String) {
-        val q = query.trim()
-        if (q.isEmpty()) return
-
-        val url = when {
-            q.startsWith("http://") || q.startsWith("https://") -> q
-            q.matches(Regex("^[a-z0-9.-]+\\.[a-z]{2,}(/.*)?$", RegexOption.IGNORE_CASE)) -> "https://$q"
-            else -> "https://www.google.com/search?q=" + Uri.encode(q)
-        }
-        session.loadUri(url)
+    private fun createTab(url: String) {
+        val t = tabs.createTab(url)
+        attachSession(t.session)
+        b.geckoView.setSession(t.session)
+        updateTabCount(); loadUrl(url)
     }
 
-    private fun updateUrlBar(url: String) {
-        activity?.runOnUiThread {
-            if (url.startsWith("resource://") || url.startsWith("file:///android_asset")) {
-                binding.urlBar.setText("")
-                binding.urlBar.hint = "ابحث..."
-            } else {
-                binding.urlBar.setText(url)
+    private fun attachSession(s: GeckoSession) {
+        s.progressDelegate = object : GeckoSession.ProgressDelegate {
+            override fun onPageStart(sess: GeckoSession, u: String) {
+                if (sess === tabs.activeTab()?.session) { showProgress(); curUrl = u; updateUrl(u) }
+            }
+            override fun onPageStop(sess: GeckoSession, ok: Boolean) {
+                if (sess === tabs.activeTab()?.session) {
+                    hideProgress()
+                    if (ok && curUrl.isNotBlank()) Storage.addHistory(requireContext(), curUrl, curTitle)
+                }
+            }
+            override fun onProgressChange(sess: GeckoSession, p: Int) {
+                if (sess === tabs.activeTab()?.session) setProgress(p)
+            }
+        }
+        s.navigationDelegate = object : GeckoSession.NavigationDelegate {
+            override fun onCanGoBack(sess: GeckoSession, ok: Boolean) { if (sess === tabs.activeTab()?.session) canBack = ok }
+            override fun onCanGoForward(sess: GeckoSession, ok: Boolean) { if (sess === tabs.activeTab()?.session) canFwd = ok }
+            override fun onLoadRequest(sess: GeckoSession, req: GeckoSession.NavigationDelegate.LoadRequest): GeckoResult<AllowOrDeny>? {
+                val u = req.uri
+                if (u.startsWith("wolf://")) { handleWolf(u); return GeckoResult.fromValue(AllowOrDeny.DENY) }
+                if (DownloadsHelper.isDownloadUrl(u)) { startDl(u, null); return GeckoResult.fromValue(AllowOrDeny.DENY) }
+                return GeckoResult.fromValue(AllowOrDeny.ALLOW)
+            }
+        }
+        s.contentDelegate = object : GeckoSession.ContentDelegate {
+            override fun onTitleChange(sess: GeckoSession, title: String?) {
+                curTitle = title ?: ""
+                if (sess === tabs.activeTab()?.session) tabs.updateTab(tabs.activeTab()!!, title = curTitle)
+            }
+            override fun onExternalResponse(sess: GeckoSession, r: GeckoSession.WebResponseInfo) {
+                startDl(r.uri, r.filename)
             }
         }
     }
 
-    private fun showProgress() {
-        activity?.runOnUiThread {
-            binding.progressBar.visibility = View.VISIBLE
-            binding.progressBar.progress = 0
-        }
-    }
+    private fun loadUrl(u: String) { tabs.activeTab()?.session?.loadUri(u) }
 
-    private fun hideProgress() {
-        activity?.runOnUiThread {
-            binding.progressBar.visibility = View.GONE
-        }
-    }
-
-    private fun setProgress(p: Int) {
-        activity?.runOnUiThread {
-            binding.progressBar.progress = p
-        }
-    }
-
-    private fun showMainMenu(anchor: View) {
-        val popup = PopupMenu(requireContext(), anchor)
-        popup.menu.add(0, 1, 0, "→  رجوع")
-        popup.menu.add(0, 2, 1, "←  تقدّم")
-        popup.menu.add(0, 3, 2, "⟳  تحديث")
-        popup.menu.add(0, 4, 3, "🏠  الرئيسية")
-        popup.menu.add(0, 5, 4, "📑  التبويبات")
-        popup.menu.add(0, 6, 5, "⬇  التنزيلات")
-        popup.menu.add(0, 7, 6, "⭐  المفضلة")
-        popup.menu.add(0, 8, 7, "🕘  السجل")
-        popup.menu.add(0, 9, 8, "🌐  الترجمة")
-        popup.menu.add(0, 10, 9, "⚙  الإعدادات")
-        popup.menu.add(0, 11, 10, "ℹ  حول")
-
-        popup.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                1 -> if (canGoBack()) goBack()
-                2 -> if (canGoForward()) goForward()
-                3 -> reload()
-                4 -> goHome()
-                5 -> showTabsDialog()
-                6 -> session.loadUri("resource://android/assets/downloads.html")
-                7 -> session.loadUri("resource://android/assets/bookmarks.html")
-                8 -> session.loadUri("resource://android/assets/history.html")
-                9 -> session.loadUri("resource://android/assets/translate.html")
-                10 -> session.loadUri("resource://android/assets/settings.html")
-                11 -> session.loadUri("resource://android/assets/about.html")
+    private fun handleWolf(u: String) {
+        try {
+            val uri = Uri.parse(u)
+            when (uri.host) {
+                "bookmarks" -> loadBookmarks()
+                "history" -> loadHistory()
+                "downloads" -> loadDownloads()
+                "add-bookmark" -> { Storage.addBookmark(requireContext(), uri.getQueryParameter("url") ?: return, uri.getQueryParameter("title") ?: ""); toast("تم الحفظ") }
+                "remove-bookmark" -> { Storage.removeBookmark(requireContext(), uri.getQueryParameter("url") ?: return); loadBookmarks() }
+                "clear-history" -> { Storage.clearHistory(requireContext()); loadHistory() }
+                "clear-bookmarks" -> { Storage.clearBookmarks(requireContext()); loadBookmarks() }
+                "clear-all" -> { Storage.clearAll(requireContext()); toast("تم مسح كل شيء") }
+                "export" -> exportSync()
+                "import" -> showImport()
             }
-            true
-        }
-        popup.show()
+        } catch (e: Exception) { toast("خطأ: ${e.message}") }
     }
 
-    private fun showTabsDialog() {
+    private fun startDl(u: String, f: String?) {
+        val id = DownloadsHelper.start(requireContext(), u, f)
+        toast(if (id > 0) "بدأ التنزيل" else "فشل التنزيل")
+    }
+
+    private fun loadBookmarks() { loadUrl("resource://android/assets/bookmarks.html?d=${enc(Storage.getBookmarks(requireContext()).toString())}") }
+    private fun loadHistory() { loadUrl("resource://android/assets/history.html?d=${enc(Storage.getHistory(requireContext()).toString())}") }
+    private fun loadDownloads() { loadUrl("resource://android/assets/downloads.html?d=${enc(Storage.getDownloads(requireContext()).toString())}") }
+    private fun enc(s: String) = Base64.encodeToString(s.toByteArray(), Base64.NO_WRAP or Base64.URL_SAFE)
+
+    private fun toggleBookmark() {
+        if (curUrl.isBlank() || curUrl.startsWith("resource://") || curUrl.startsWith("about:")) { toast("لا يمكن حفظ هذه الصفحة"); return }
+        if (Storage.isBookmarked(requireContext(), curUrl)) { Storage.removeBookmark(requireContext(), curUrl); toast("تم الحذف") }
+        else { Storage.addBookmark(requireContext(), curUrl, curTitle); toast("تم الحفظ") }
+    }
+
+    private fun showTabs() {
+        val list = tabs.allTabs()
+        val items = list.mapIndexed { i, t -> (if (i == tabs.activeIndex()) "▶ " else "   ") + t.title.take(40) }.toTypedArray()
         AlertDialog.Builder(requireContext())
-            .setTitle("التبويبات المفتوحة")
-            .setMessage("• التبويب الحالي\n\n(دعم تعدد التبويبات سيُضاف في التحديث القادم)")
-            .setPositiveButton("تبويب جديد") { _, _ ->
-                session.loadUri(HOME_URL)
+            .setTitle("التبويبات (${list.size})")
+            .setItems(items) { _, w -> switchTab(w) }
+            .setPositiveButton("تبويب جديد") { _, _ -> createTab(HOME) }
+            .setNeutralButton("حذف الحالي") { _, _ ->
+                tabs.closeTab(tabs.activeIndex())
+                tabs.activeTab()?.let { attachSession(it.session); b.geckoView.setSession(it.session); loadUrl(it.url); updateTabCount() }
             }
-            .setNegativeButton("إغلاق", null)
-            .show()
+            .setNegativeButton("إغلاق", null).show()
     }
+
+    private fun switchTab(i: Int) {
+        val t = tabs.setActive(i) ?: return
+        b.geckoView.setSession(t.session); loadUrl(t.url); updateTabCount(); updateUrl(t.url)
+    }
+
+    private fun updateTabCount() { b.tabsBtn.text = "📑 ${tabs.count()}" }
+
+    private fun showSync() {
+        val opts = arrayOf("☁ تصدير البيانات", "📥 استيراد البيانات", "🔗 نسخ كود المزامنة")
+        AlertDialog.Builder(requireContext()).setTitle("المزامنة").setItems(opts) { _, w ->
+            when (w) { 0 -> exportSync(); 1 -> showImport(); 2 -> copyCode() }
+        }.show()
+    }
+
+    private fun exportSync() {
+        val json = SyncManager.exportJson(requireContext())
+        AlertDialog.Builder(requireContext())
+            .setTitle("تصدير البيانات")
+            .setMessage("احفظ هذا النص:")
+            .setNeutralButton("نسخ") { _, _ -> copyToClip(json); toast("تم النسخ") }
+            .setPositiveButton("مشاركة") { _, _ ->
+                val i = Intent(Intent.ACTION_SEND).apply { type = "text/plain"; putExtra(Intent.EXTRA_TEXT, json) }
+                startActivity(Intent.createChooser(i, "مشاركة"))
+            }
+            .setNegativeButton("إغلاق", null).show()
+    }
+
+    private fun showImport() {
+        val inp = EditText(requireContext()).apply { hint = "الصق كود المزامنة"; setPadding(30,30,30,30) }
+        AlertDialog.Builder(requireContext()).setTitle("استيراد البيانات").setView(inp)
+            .setPositiveButton("استيراد") { _, _ ->
+                val t = inp.text.toString().trim()
+                if (t.isBlank()) { toast("لا يوجد نص"); return@setPositiveButton }
+                val ok = if (t.startsWith("{")) SyncManager.importJson(requireContext(), t) else SyncManager.importBase64(requireContext(), t)
+                toast(if (ok) "تم الاستيراد" else "فشل")
+            }.setNegativeButton("إلغاء", null).show()
+    }
+
+    private fun copyCode() { copyToClip(SyncManager.exportBase64(requireContext())); toast("تم النسخ") }
+    private fun copyToClip(s: String) {
+        val cm = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        cm.setPrimaryClip(ClipData.newPlainText("wolf", s))
+    }
+
+    private fun doSearch(q: String) {
+        val x = q.trim(); if (x.isEmpty()) return
+        val u = when {
+            x.startsWith("http://") || x.startsWith("https://") -> x
+            x.matches(Regex("^[a-z0-9.-]+\\.[a-z]{2,}(/.*)?$", RegexOption.IGNORE_CASE)) -> "https://$x"
+            else -> "https://www.google.com/search?q=" + Uri.encode(x)
+        }
+        loadUrl(u)
+    }
+
+    private fun updateUrl(u: String) = activity?.runOnUiThread {
+        if (u.startsWith("resource://") || u.startsWith("file://")) { b.urlBar.setText(""); b.urlBar.hint = "ابحث..." }
+        else b.urlBar.setText(u)
+    }
+    private fun showProgress() = activity?.runOnUiThread { b.progressBar.visibility = View.VISIBLE; b.progressBar.progress = 0 }
+    private fun hideProgress() = activity?.runOnUiThread { b.progressBar.visibility = View.GONE }
+    private fun setProgress(p: Int) = activity?.runOnUiThread { b.progressBar.progress = p }
+
+    private fun showMenu(anchor: View) {
+        val p = PopupMenu(requireContext(), anchor)
+        p.menu.add(0,1,0,"🏠 الرئيسية")
+        p.menu.add(0,2,1,"⭐ المفضلة")
+        p.menu.add(0,3,2,"🕘 السجل")
+        p.menu.add(0,4,3,"⬇ التنزيلات")
+        p.menu.add(0,5,4,"🌐 الترجمة")
+        p.menu.add(0,6,5,"☁ المزامنة")
+        p.menu.add(0,7,6,"⚙ الإعدادات")
+        p.menu.add(0,8,7,"ℹ حول")
+        p.setOnMenuItemClickListener { it ->
+            when (it.itemId) {
+                1 -> loadUrl(HOME); 2 -> loadBookmarks(); 3 -> loadHistory(); 4 -> loadDownloads()
+                5 -> loadUrl("resource://android/assets/translate.html")
+                6 -> showSync()
+                7 -> loadUrl("resource://android/assets/settings.html")
+                8 -> loadUrl("resource://android/assets/about.html")
+            }; true
+        }; p.show()
+    }
+
+    private fun toast(m: String) = activity?.runOnUiThread { Toast.makeText(requireContext(), m, Toast.LENGTH_SHORT).show() }
+
+    fun canGoBack() = canBack
+    fun canGoForward() = canFwd
+    fun goBack() { if (canBack) tabs.activeTab()?.session?.goBack() }
+    fun goForward() { if (canFwd) tabs.activeTab()?.session?.goForward() }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        try { session.close() } catch (e: Exception) {}
-        _binding = null
+        try { tabs.allTabs().forEach { it.session.close() } } catch (e: Exception) {}
+        _b = null
     }
 }

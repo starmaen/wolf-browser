@@ -1,26 +1,27 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{--bg:#0B1929;--surface:#0F2233;--primary:#4FC3F7;--text:#E8EEF4;--text-sec:rgba(232,238,244,0.55);--border:rgba(79,195,247,0.15)}
-body.light{--bg:#F0F4F8;--surface:#FFFFFF;--primary:#0288D1;--text:#0B1929;--text-sec:rgba(11,25,41,0.6);--border:rgba(2,136,209,0.2)}
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0B1929;--surface:#0F2233;--card2:#183348;--primary:#4FC3F7;--text:#E8EEF4;--text-sec:rgba(232,238,244,.55);--border:rgba(79,195,247,.15);--danger:#FF6B6B}
+body.light{--bg:#F0F4F8;--surface:#FFF;--card2:#D0DAE5;--primary:#0288D1;--text:#0B1929;--text-sec:rgba(11,25,41,.6);--border:rgba(2,136,209,.2)}
 body{font-family:-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:16px 14px}
-.back{display:inline-flex;color:var(--primary);text-decoration:none;font-size:15px;padding:10px 0;margin-bottom:10px}
-h1{font-size:22px;font-weight:800;margin-bottom:20px}
+.back{color:var(--primary);text-decoration:none;font-size:15px;display:inline-block;padding:10px 0;margin-bottom:10px}
+h1{font-size:20px;font-weight:800;margin-bottom:16px}
+.row{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px}
+.ic{width:38px;height:38px;border-radius:10px;background:var(--card2);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.body{flex:1;min-width:0}.title{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sub{font-size:11px;color:var(--text-sec);direction:ltr;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.del{color:var(--danger);background:none;border:none;font-size:15px;padding:8px;cursor:pointer}
 .empty{text-align:center;padding:60px 20px;color:var(--text-sec)}
-.empty .ic{font-size:52px;margin-bottom:12px;opacity:0.5}
-</style>
-</head>
-<body>
-<a class="back" href="resource://android/assets/home.html">→ الرئيسية</a>
-<h1>المفضلة</h1>
-<div class="empty"><div class="ic">⭐</div><p>لا توجد مواقع محفوظة بعد</p></div>
+.empty .i{font-size:52px;opacity:.5;margin-bottom:12px}
+.bc{width:100%;padding:12px;border-radius:12px;background:var(--surface);color:var(--danger);border:1px solid var(--border);font-weight:600;font-size:13px;margin-top:16px;cursor:pointer}
+</style></head><body>
+<a class="back" href="resource://android/assets/home.html">→ الرئيسية</a><h1>⭐ المفضلة</h1>
+<div id="list"></div><button class="bc" id="clr" style="display:none">🗑 مسح الكل</button>
 <script>
-function ls(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
-if((ls('theme') || 'dark') === 'light') document.body.classList.add('light');
-</script>
-</body>
-</html>
+try{if((localStorage.getItem('theme')||'dark')==='light')document.body.classList.add('light')}catch(e){}
+function gd(){try{var p=new URLSearchParams(location.search);var d=p.get('d');return d?JSON.parse(atob(d.replace(/-/g,'+').replace(/_/g,'/'))):[]}catch(e){return[]}}
+function esc(s){return String(s||'').replace(/[<>&"]/g,function(c){return{'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]})}
+var d=gd();
+if(!d.length){document.getElementById('list').innerHTML='<div class="empty"><div class="i">⭐</div><p>لا توجد مواقع محفوظة</p><p style="font-size:12px;margin-top:8px">اضغط ⭐ بالأعلى لحفظ أي صفحة</p></div>'}
+else{document.getElementById('list').innerHTML=d.map(function(b){return '<div class="row"><div class="ic">🔗</div><div class="body" onclick="location.href=\''+esc(b.url)+'\'"><div class="title">'+esc(b.title||b.url)+'</div><div class="sub">'+esc(b.url)+'</div></div><button class="del" onclick="event.stopPropagation();if(confirm(\'حذف؟\'))location.href=\'wolf://remove-bookmark?url=\'+encodeURIComponent(\''+esc(b.url)+'\')">🗑</button></div>'}).join('');document.getElementById('clr').style.display='block'}
+document.getElementById('clr').onclick=function(){if(confirm('مسح الكل؟'))location.href='wolf://clear-bookmarks'};
+</script></body></html>

@@ -1,107 +1,36 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
-<style>
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{--bg:#0B1929;--surface:#0F2233;--card2:#183348;--primary:#4FC3F7;--text:#E8EEF4;--text-sec:rgba(232,238,244,0.55);--border:rgba(79,195,247,0.15);--on-primary:#00222E}
-body.light{--bg:#F0F4F8;--surface:#FFFFFF;--card2:#D0DAE5;--primary:#0288D1;--text:#0B1929;--text-sec:rgba(11,25,41,0.6);--border:rgba(2,136,209,0.2);--on-primary:#FFFFFF}
-body{font-family:-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:16px 14px 40px;transition:background .2s,color .2s}
+:root{--bg:#0B1929;--surface:#0F2233;--card2:#183348;--primary:#4FC3F7;--text:#E8EEF4;--text-sec:rgba(232,238,244,.55);--border:rgba(79,195,247,.15);--danger:#FF6B6B}
+body.light{--bg:#F0F4F8;--surface:#FFF;--card2:#D0DAE5;--primary:#0288D1;--text:#0B1929;--text-sec:rgba(11,25,41,.6);--border:rgba(2,136,209,.2)}
+body{font-family:-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:16px 14px 40px}
 .back{display:inline-flex;color:var(--primary);text-decoration:none;font-size:15px;padding:10px 0;margin-bottom:10px}
-h1{font-size:22px;font-weight:800;margin-bottom:20px}
-.sec{font-size:12px;font-weight:700;letter-spacing:1px;color:var(--text-sec);margin:22px 4px 10px;text-transform:uppercase}
-.row{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:8px;text-decoration:none;color:inherit;cursor:pointer}
-.ic{width:42px;height:42px;border-radius:12px;background:var(--card2);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.body{flex:1;min-width:0}
-.title{font-size:15px;font-weight:600}
-.sub{font-size:12px;color:var(--text-sec);margin-top:2px}
-.sw{width:48px;height:28px;border-radius:50px;background:var(--card2);position:relative;transition:background .2s;flex-shrink:0;cursor:pointer}
+h1{font-size:20px;font-weight:800;margin-bottom:16px}
+.sec{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--text-sec);margin:20px 4px 10px;text-transform:uppercase}
+.row{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px;cursor:pointer}
+.ic{width:40px;height:40px;border-radius:11px;background:var(--card2);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.body{flex:1}.title{font-size:14px;font-weight:600}.sub{font-size:11px;color:var(--text-sec);margin-top:2px}
+.sw{width:44px;height:26px;border-radius:50px;background:var(--card2);position:relative;transition:background .2s;flex-shrink:0;cursor:pointer}
 .sw::after{content:"";position:absolute;top:2px;inset-inline-start:2px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s}
-.sw.on{background:#69F0AE}
-.sw.on::after{transform:translateX(-20px)}
-html[dir="ltr"] .sw.on::after{transform:translateX(20px)}
-</style>
-</head>
-<body>
+.sw.on{background:#69F0AE}.sw.on::after{transform:translateX(-18px)}
+html[dir=ltr] .sw.on::after{transform:translateX(18px)}
+.row.danger .ic,.row.danger .title{color:var(--danger)}
+</style></head><body>
 <a class="back" href="resource://android/assets/home.html">→ الرئيسية</a>
-<h1>الإعدادات</h1>
-
+<h1>⚙ الإعدادات</h1>
 <div class="sec">المظهر</div>
-<div class="row" onclick="toggleTheme()">
-  <div class="ic">🌙</div>
-  <div class="body"><div class="title">الوضع الليلي</div><div class="sub" id="themeSub">مفعّل</div></div>
-  <div class="sw" id="themeSw"></div>
-</div>
-
-<div class="sec">عام</div>
-<div class="row" onclick="location.href='resource://android/assets/home.html'">
-  <div class="ic">🔍</div>
-  <div class="body"><div class="title">محرك البحث</div><div class="sub" id="engSub">Google</div></div>
-</div>
-<div class="row" onclick="showInfo('اللغة','العربية والإنجليزية مدعومتان')">
-  <div class="ic">🌐</div>
-  <div class="body"><div class="title">اللغة</div><div class="sub">العربية</div></div>
-</div>
-
+<div class="row" onclick="toggleTheme()"><div class="ic">🌙</div><div class="body"><div class="title">الوضع الليلي</div><div class="sub" id="tSub">مفعّل</div></div><div class="sw" id="tSw"></div></div>
 <div class="sec">الخصوصية</div>
-<div class="row" onclick="showInfo('مانع الإعلانات','قيد التطوير - سيتم تفعيله في إصدار قادم')">
-  <div class="ic">🛡</div>
-  <div class="body"><div class="title">مانع الإعلانات</div><div class="sub">قيد التطوير</div></div>
-</div>
-<div class="row" onclick="showInfo('WireGuard VPN','قيد التطوير - سيتم إضافة استيراد ملفات .conf')">
-  <div class="ic">🔒</div>
-  <div class="body"><div class="title">WireGuard VPN</div><div class="sub">قيد التطوير</div></div>
-</div>
-
-<div class="sec">إدارة البيانات</div>
-<div class="row" onclick="clearData('history')">
-  <div class="ic">🕘</div>
-  <div class="body"><div class="title">مسح السجل</div><div class="sub">حذف سجل التصفح</div></div>
-</div>
-<div class="row" onclick="clearData('all')">
-  <div class="ic">🧹</div>
-  <div class="body"><div class="title">مسح كل البيانات</div><div class="sub">السجل + المفضلة + الإعدادات</div></div>
-</div>
-
+<div class="row" onclick="toggleAd()"><div class="ic">🛡</div><div class="body"><div class="title">مانع الإعلانات</div><div class="sub" id="aSub">مفعّل</div></div><div class="sw" id="aSw"></div></div>
+<div class="sec">البيانات</div>
+<div class="row danger" onclick="if(confirm('مسح السجل؟'))location.href='wolf://clear-history'"><div class="ic">🕘</div><div class="body"><div class="title">مسح السجل</div><div class="sub">حذف سجل التصفح</div></div></div>
+<div class="row danger" onclick="if(confirm('مسح المفضلة؟'))location.href='wolf://clear-bookmarks'"><div class="ic">⭐</div><div class="body"><div class="title">مسح المفضلة</div><div class="sub">حذف كل المواقع المحفوظة</div></div></div>
+<div class="row danger" onclick="if(confirm('مسح كل شيء؟')){try{localStorage.clear()}catch(e){};location.href='wolf://clear-all'}"><div class="ic">🔥</div><div class="body"><div class="title">مسح كل شيء</div><div class="sub">السجل + المفضلة + الإعدادات</div></div></div>
 <div class="sec">حول</div>
-<div class="row" onclick="location.href='resource://android/assets/about.html'">
-  <div class="ic">ℹ</div>
-  <div class="body"><div class="title">حول التطبيق</div><div class="sub">Wolf Browser 1.0.0</div></div>
-</div>
-
+<div class="row" onclick="location.href='resource://android/assets/about.html'"><div class="ic">ℹ</div><div class="body"><div class="title">حول التطبيق</div><div class="sub">Wolf Browser 1.0.0</div></div></div>
 <script>
-function ls(k, v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k, v); }catch(e){return null;} }
-function getTheme(){ return ls('theme') || 'dark'; }
-function applyTheme(){
-  var t = getTheme();
-  document.body.classList.toggle('light', t === 'light');
-  var sw = document.getElementById('themeSw');
-  if(t === 'dark') sw.classList.add('on'); else sw.classList.remove('on');
-  document.getElementById('themeSub').textContent = t === 'dark' ? 'مفعّل' : 'موقوف';
-}
-function toggleTheme(){
-  var t = getTheme() === 'light' ? 'dark' : 'light';
-  ls('theme', t);
-  applyTheme();
-}
-function showInfo(t, m){ alert(t + '\n\n' + m); }
-function clearData(kind){
-  if(kind === 'history'){ ls('history', '[]'); showInfo('تم','تم مسح السجل'); }
-  else if(kind === 'all'){
-    if(confirm('مسح كل البيانات؟')){
-      try{ localStorage.clear(); }catch(e){}
-      showInfo('تم','تم مسح كل البيانات');
-    }
-  }
-}
-function updateEng(){
-  var e = ls('engine') || 'google';
-  var map = {google:'Google', bing:'Bing', ddg:'DuckDuckGo', yandex:'Yandex'};
-  document.getElementById('engSub').textContent = map[e] || 'Google';
-}
-applyTheme();
-updateEng();
-</script>
-</body>
-</html>
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+function apply(){var t=ls('theme')||'dark';document.body.classList.toggle('light',t==='light');document.getElementById('tSw').classList.toggle('on',t==='dark');document.getElementById('tSub').textContent=t==='dark'?'مفعّل':'موقوف';var a=ls('adblock')!=='off';document.getElementById('aSw').classList.toggle('on',a);document.getElementById('aSub').textContent=a?'مفعّل':'موقوف'}
+function toggleTheme(){ls('theme',(ls('theme')||'dark')==='light'?'dark':'light');apply()}
+function toggleAd(){ls('adblock',ls('adblock')!=='off'?'off':'on');apply()}
+apply();
+</script></body></html>
