@@ -2,28 +2,81 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,sans-serif;background:#0B1929;color:#E8EEF4;min-height:100vh;padding:0 14px 30px;overflow-x:hidden}
-.hero{display:flex;flex-direction:column;align-items:center;padding:30px 0 20px;gap:12px}
-.logo-ring{width:130px;height:130px;border-radius:50%;background:conic-gradient(from 200deg,#4FC3F7,#00E5FF,#4FC3F7);padding:4px;box-shadow:0 0 40px rgba(79,195,247,0.25)}
-.logo-inner{width:100%;height:100%;border-radius:50%;background:#132A3E;display:flex;align-items:center;justify-content:center;font-size:64px}
-.app-name{font-size:22px;font-weight:800}
-.app-name .en{color:#4FC3F7;font-size:16px;opacity:0.85;margin-inline-start:6px}
-.search-wrap{display:flex;align-items:center;background:#0F2233;border:1px solid rgba(79,195,247,0.2);border-radius:50px;padding:4px 6px 4px 16px;height:52px;margin-top:10px;box-shadow:0 4px 20px rgba(0,0,0,0.25)}
-.search-input{flex:1;font-size:15px;color:#E8EEF4;background:none;border:none;outline:none;padding:0 10px;min-width:0}
-.search-input::placeholder{color:rgba(232,238,244,0.5)}
-.section-title{font-size:12px;font-weight:700;letter-spacing:1px;color:rgba(232,238,244,0.55);margin:22px 4px 10px}
+:root{
+  --bg:#0B1929;--surface:#0F2233;--card:#132A3E;--card2:#183348;
+  --primary:#4FC3F7;--accent:#00E5FF;--text:#E8EEF4;--text-sec:rgba(232,238,244,0.55);
+  --border:rgba(79,195,247,0.15);--on-primary:#00222E;
+}
+body.light{
+  --bg:#F0F4F8;--surface:#FFFFFF;--card:#E1E8F0;--card2:#D0DAE5;
+  --primary:#0288D1;--accent:#01579B;--text:#0B1929;--text-sec:rgba(11,25,41,0.6);
+  --border:rgba(2,136,209,0.2);--on-primary:#FFFFFF;
+}
+body{font-family:-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:0 14px 30px;overflow-x:hidden;transition:background .2s,color .2s}
+
+.topbar{display:flex;align-items:center;gap:8px;padding:10px 0;position:sticky;top:0;background:var(--bg);z-index:10}
+.tb-btn{min-width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--surface);color:var(--primary);border:1px solid var(--border);font-size:15px;font-weight:700;padding:0 10px;cursor:pointer;transition:transform .15s}
+.tb-btn:active{transform:scale(0.93);background:var(--card2)}
+.tb-btn.on{background:#69F0AE;color:#00220f;border-color:transparent}
+.spacer{flex:1}
+
+.hero{display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:12px}
+.logo-ring{width:130px;height:130px;border-radius:50%;background:conic-gradient(from 200deg,var(--primary),var(--accent),var(--primary));padding:4px;box-shadow:0 0 40px rgba(79,195,247,0.25);animation:glow 3s ease-in-out infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 40px rgba(79,195,247,0.25)}50%{box-shadow:0 0 60px rgba(79,195,247,0.45)}}
+.logo-inner{width:100%;height:100%;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:64px}
+.app-name{font-size:22px;font-weight:800;color:var(--text)}
+.app-name .en{color:var(--primary);font-size:16px;opacity:0.85;margin-inline-start:6px}
+
+.search-wrap{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:50px;padding:4px 6px 4px 16px;height:52px;margin-top:10px;box-shadow:0 4px 20px rgba(0,0,0,0.15)}
+.search-input{flex:1;font-size:15px;color:var(--text);background:none;border:none;outline:none;padding:0 10px;min-width:0}
+.search-input::placeholder{color:var(--text-sec)}
+.engine-btn{display:flex;align-items:center;gap:6px;background:var(--card2);border-radius:50px;padding:6px 10px;height:40px;cursor:pointer;flex-shrink:0;transition:transform .15s}
+.engine-btn:active{transform:scale(0.94)}
+.engine-dot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff}
+.engine-arrow{font-size:11px;color:var(--primary)}
+
+.section-title{font-size:12px;font-weight:700;letter-spacing:1px;color:var(--text-sec);margin:22px 4px 10px}
 .shortcuts{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.sc-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 2px;border-radius:14px;text-decoration:none;color:inherit;transition:background .15s}
-.sc-item:active{background:#0F2233}
-.sc-ico{width:54px;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,0.35)}
-.sc-name{font-size:11px;color:rgba(232,238,244,0.55);text-align:center;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.hint{font-size:11px;color:rgba(232,238,244,0.4);text-align:center;padding:14px 10px}
+@media(max-width:340px){.shortcuts{grid-template-columns:repeat(3,1fr)}}
+.sc-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 2px;border-radius:14px;text-decoration:none;color:inherit;transition:background .15s;position:relative}
+.sc-item:active{background:var(--surface)}
+.sc-ico{width:54px;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,0.25)}
+.sc-ico.add{background:var(--surface);border:2px dashed var(--primary);color:var(--primary);box-shadow:none}
+.sc-name{font-size:11px;color:var(--text-sec);text-align:center;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hint{font-size:11px;color:var(--text-sec);text-align:center;padding:14px 10px;opacity:0.7}
+
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center;z-index:100}
+.modal-bg.open{display:flex;animation:fadeIn .18s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--bg);width:100%;max-width:600px;border-radius:22px 22px 0 0;padding:22px 20px 26px;border-top:1px solid var(--border);animation:slideUp .22s}
+@keyframes slideUp{from{transform:translateY(30px)}to{transform:none}}
+.modal h3{font-size:17px;font-weight:700;margin-bottom:16px;text-align:center;color:var(--text)}
+.eng-opt{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;cursor:pointer;transition:transform .15s}
+.eng-opt:active{transform:scale(0.98);background:var(--card2)}
+.eng-opt.selected{border-color:var(--primary);background:var(--card2)}
+.eng-opt .dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:16px}
+.eng-opt .nm{flex:1;font-weight:600;color:var(--text)}
+.eng-opt .ck{color:var(--primary);font-size:18px}
+.inp{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;color:var(--text);font-size:15px;outline:none;margin-bottom:10px;font-family:inherit}
+.inp:focus{border-color:var(--primary)}
+.btn{width:100%;padding:14px;border-radius:12px;background:var(--primary);color:var(--on-primary);font-weight:700;font-size:15px;border:none;cursor:pointer;margin-top:6px}
+.btn.ghost{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+.btn:active{transform:scale(0.98)}
 </style>
 </head>
 <body>
+
+<div class="topbar">
+  <button class="tb-btn" id="transBtn" title="Translate">A/文</button>
+  <button class="tb-btn" id="themeBtn" title="Theme">🌙</button>
+  <button class="tb-btn" id="vpnBtn" title="VPN">🛡</button>
+  <div class="spacer"></div>
+  <button class="tb-btn" id="menuBtn" title="Settings">⋮</button>
+</div>
+
 <div class="hero">
   <div class="logo-ring"><div class="logo-inner">🐺</div></div>
   <div class="app-name">الذئب <span class="en">Wolf</span></div>
@@ -32,61 +85,149 @@ body{font-family:-apple-system,sans-serif;background:#0B1929;color:#E8EEF4;min-h
 <div class="search-wrap">
   <span style="font-size:18px;opacity:0.6">🔍</span>
   <input class="search-input" id="q" type="text" placeholder="ابحث أو اكتب عنواناً..." autocomplete="off">
+  <div class="engine-btn" id="engineBtn">
+    <span class="engine-dot" id="engineDot" style="background:#4285F4">G</span>
+    <span class="engine-arrow">▾</span>
+  </div>
 </div>
 
 <div class="section-title">المواقع السريعة</div>
 <div class="shortcuts" id="sc"></div>
-<div class="hint">اضغط على أي أيقونة لفتح الموقع</div>
+<div class="hint">اضغط على + لإضافة موقع جديد</div>
+
+<div class="modal-bg" id="engModal">
+  <div class="modal">
+    <h3>اختر محرك البحث</h3>
+    <div id="engList"></div>
+    <button class="btn ghost" onclick="closeModal('engModal')">إغلاق</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="addModal">
+  <div class="modal">
+    <h3>إضافة موقع</h3>
+    <input class="inp" id="newName" placeholder="اسم الموقع (مثال: YouTube)">
+    <input class="inp" id="newUrl" placeholder="الرابط (https://...)" style="direction:ltr;text-align:left">
+    <button class="btn" onclick="saveNew()">حفظ</button>
+    <button class="btn ghost" onclick="closeModal('addModal')">إلغاء</button>
+  </div>
+</div>
 
 <script>
 var ENGINES = {
-  google: 'https://www.google.com/search?q=',
-  bing:   'https://www.bing.com/search?q=',
-  ddg:    'https://duckduckgo.com/?q=',
-  yandex: 'https://yandex.com/search/?text='
+  google: {name:'Google',     url:'https://www.google.com/search?q=',  color:'#4285F4', letter:'G'},
+  bing:   {name:'Bing',       url:'https://www.bing.com/search?q=',    color:'#008373', letter:'b'},
+  ddg:    {name:'DuckDuckGo', url:'https://duckduckgo.com/?q=',        color:'#DE5833', letter:'D'},
+  yandex: {name:'Yandex',     url:'https://yandex.com/search/?text=',  color:'#FC3F1D', letter:'Y'}
 };
-var SC = [
+
+var DEFAULT_SC = [
   { name:'YouTube',  url:'https://youtube.com',        color:'#FF0000', icon:'▶' },
   { name:'Telegram', url:'https://web.telegram.org',   color:'#229ED9', icon:'✈' },
   { name:'WhatsApp', url:'https://web.whatsapp.com',   color:'#25D366', icon:'✆' },
   { name:'Facebook', url:'https://facebook.com',       color:'#1877F2', icon:'f' },
   { name:'X',        url:'https://x.com',              color:'#0A0A0A', icon:'𝕏' },
   { name:'GitHub',   url:'https://github.com',         color:'#24292E', icon:'⎔' },
-  { name:'XDA',      url:'https://xda-developers.com', color:'#FF6E00', icon:'X' },
-  { name:'+',        url:'javascript:addSite()',       color:'',        icon:'+' }
+  { name:'XDA',      url:'https://xda-developers.com', color:'#FF6E00', icon:'X' }
 ];
 
-function render(){
-  document.getElementById('sc').innerHTML = SC.map(function(s){
-    var sty = s.icon==='+'
-      ? 'background:#0F2233;border:2px dashed #4FC3F7;color:#4FC3F7;box-shadow:none'
-      : 'background:'+s.color;
-    return '<a class="sc-item" href="'+s.url+'">'+
-      '<div class="sc-ico" style="'+sty+'">'+s.icon+'</div>'+
-      '<div class="sc-name">'+(s.name==='+'?'إضافة':s.name)+'</div>'+
-    '</a>';
-  }).join('');
+function ls(k, v){
+  try{
+    if(v === undefined) return localStorage.getItem(k);
+    localStorage.setItem(k, v);
+  }catch(e){ return null; }
 }
 
-function addSite(){
-  var u = prompt('أدخل رابط الموقع:');
-  if(!u) return;
+var currentEngine = ls('engine') || 'google';
+var theme = ls('theme') || 'dark';
+var shortcuts = [];
+try{ shortcuts = JSON.parse(ls('shortcuts') || 'null') || DEFAULT_SC.slice(); }
+catch(e){ shortcuts = DEFAULT_SC.slice(); }
+
+function applyTheme(){
+  document.body.classList.toggle('light', theme === 'light');
+  document.getElementById('themeBtn').textContent = theme === 'light' ? '☀' : '🌙';
+  ls('theme', theme);
+}
+
+function updateEngineDot(){
+  var e = ENGINES[currentEngine];
+  var d = document.getElementById('engineDot');
+  d.textContent = e.letter;
+  d.style.background = e.color;
+}
+
+function render(){
+  var html = shortcuts.map(function(s,i){
+    return '<a class="sc-item" href="'+s.url+'">'+
+      '<div class="sc-ico" style="background:'+s.color+'">'+s.icon+'</div>'+
+      '<div class="sc-name">'+s.name+'</div>'+
+    '</a>';
+  }).join('');
+  html += '<div class="sc-item" id="addBtn"><div class="sc-ico add">＋</div><div class="sc-name">إضافة</div></div>';
+  document.getElementById('sc').innerHTML = html;
+  document.getElementById('addBtn').onclick = function(){ openModal('addModal'); };
+}
+
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+function saveNew(){
+  var n = document.getElementById('newName').value.trim();
+  var u = document.getElementById('newUrl').value.trim();
+  if(!n || !u) return;
   if(!/^https?:/i.test(u)) u = 'https://' + u;
-  SC.splice(SC.length-1,0,{name:u.replace(/^https?:\/\//,'').split('/')[0],url:u,color:'#8E44AD',icon:'★'});
+  shortcuts.push({name:n, url:u, color:'#8E44AD', icon:n.charAt(0).toUpperCase()});
+  ls('shortcuts', JSON.stringify(shortcuts));
+  document.getElementById('newName').value = '';
+  document.getElementById('newUrl').value = '';
+  closeModal('addModal');
   render();
 }
 
-document.getElementById('q').addEventListener('keydown',function(e){
-  if(e.key!=='Enter') return;
+function openEngModal(){
+  var html = Object.keys(ENGINES).map(function(k){
+    var e = ENGINES[k];
+    var sel = k === currentEngine ? ' selected' : '';
+    var ck = k === currentEngine ? '<div class="ck">✓</div>' : '';
+    return '<div class="eng-opt'+sel+'" onclick="setEngine(\''+k+'\')">'+
+      '<div class="dot" style="background:'+e.color+'">'+e.letter+'</div>'+
+      '<div class="nm">'+e.name+'</div>'+ck+
+    '</div>';
+  }).join('');
+  document.getElementById('engList').innerHTML = html;
+  openModal('engModal');
+}
+
+function setEngine(k){
+  currentEngine = k;
+  ls('engine', k);
+  updateEngineDot();
+  closeModal('engModal');
+}
+
+document.getElementById('engineBtn').onclick = openEngModal;
+document.getElementById('engModal').onclick = function(e){ if(e.target === this) closeModal('engModal'); };
+document.getElementById('addModal').onclick = function(e){ if(e.target === this) closeModal('addModal'); };
+
+document.getElementById('q').addEventListener('keydown', function(e){
+  if(e.key !== 'Enter') return;
   var q = this.value.trim();
   if(!q) return;
   var url;
   if(/^https?:\/\//i.test(q)) url = q;
-  else if(/^[a-z0-9.-]+\.[a-z]{2,}/i.test(q)) url = 'https://' + q;
-  else url = ENGINES.google + encodeURIComponent(q);
+  else if(/^[a-z0-9.-]+\.[a-z]{2,}(\/.*)?$/i.test(q)) url = 'https://' + q;
+  else url = ENGINES[currentEngine].url + encodeURIComponent(q);
   location.href = url;
 });
 
+document.getElementById('transBtn').onclick = function(){ location.href = 'resource://android/assets/translate.html'; };
+document.getElementById('themeBtn').onclick = function(){ theme = (theme === 'dark' ? 'light' : 'dark'); applyTheme(); };
+document.getElementById('vpnBtn').onclick = function(){ this.classList.toggle('on'); };
+document.getElementById('menuBtn').onclick = function(){ location.href = 'resource://android/assets/settings.html'; };
+
+applyTheme();
+updateEngineDot();
 render();
 </script>
 </body>

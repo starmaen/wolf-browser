@@ -2,63 +2,106 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,sans-serif;background:#0B1929;color:#E8EEF4;min-height:100vh;padding:16px 14px 40px}
-.back{display:inline-flex;align-items:center;gap:8px;color:#4FC3F7;text-decoration:none;font-size:15px;padding:10px 0;margin-bottom:10px}
+:root{--bg:#0B1929;--surface:#0F2233;--card2:#183348;--primary:#4FC3F7;--text:#E8EEF4;--text-sec:rgba(232,238,244,0.55);--border:rgba(79,195,247,0.15);--on-primary:#00222E}
+body.light{--bg:#F0F4F8;--surface:#FFFFFF;--card2:#D0DAE5;--primary:#0288D1;--text:#0B1929;--text-sec:rgba(11,25,41,0.6);--border:rgba(2,136,209,0.2);--on-primary:#FFFFFF}
+body{font-family:-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:16px 14px 40px;transition:background .2s,color .2s}
+.back{display:inline-flex;color:var(--primary);text-decoration:none;font-size:15px;padding:10px 0;margin-bottom:10px}
 h1{font-size:22px;font-weight:800;margin-bottom:20px}
-.sec{font-size:12px;font-weight:700;letter-spacing:1px;color:rgba(232,238,244,0.55);margin:22px 4px 10px;text-transform:uppercase}
-.row{display:flex;align-items:center;gap:14px;background:#0F2233;border:1px solid rgba(79,195,247,0.15);border-radius:14px;padding:14px 16px;margin-bottom:8px;text-decoration:none;color:inherit}
-.ic{width:42px;height:42px;border-radius:12px;background:#183348;color:#4FC3F7;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sec{font-size:12px;font-weight:700;letter-spacing:1px;color:var(--text-sec);margin:22px 4px 10px;text-transform:uppercase}
+.row{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:8px;text-decoration:none;color:inherit;cursor:pointer}
+.ic{width:42px;height:42px;border-radius:12px;background:var(--card2);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 .body{flex:1;min-width:0}
 .title{font-size:15px;font-weight:600}
-.sub{font-size:12px;color:rgba(232,238,244,0.55);margin-top:2px}
-.about{padding:20px 4px;color:rgba(232,238,244,0.55);font-size:13px;line-height:1.7;text-align:center}
-.about .logo{font-size:56px;display:block;margin-bottom:8px}
-.about .nm{color:#E8EEF4;font-weight:700;font-size:16px}
+.sub{font-size:12px;color:var(--text-sec);margin-top:2px}
+.sw{width:48px;height:28px;border-radius:50px;background:var(--card2);position:relative;transition:background .2s;flex-shrink:0;cursor:pointer}
+.sw::after{content:"";position:absolute;top:2px;inset-inline-start:2px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s}
+.sw.on{background:#69F0AE}
+.sw.on::after{transform:translateX(-20px)}
+html[dir="ltr"] .sw.on::after{transform:translateX(20px)}
 </style>
 </head>
 <body>
-<a class="back" href="file:///android_asset/home.html">→ الرئيسية</a>
+<a class="back" href="resource://android/assets/home.html">→ الرئيسية</a>
 <h1>الإعدادات</h1>
 
+<div class="sec">المظهر</div>
+<div class="row" onclick="toggleTheme()">
+  <div class="ic">🌙</div>
+  <div class="body"><div class="title">الوضع الليلي</div><div class="sub" id="themeSub">مفعّل</div></div>
+  <div class="sw" id="themeSw"></div>
+</div>
+
 <div class="sec">عام</div>
-<a class="row" href="javascript:alert('اختر محرك البحث في الواجهة الرئيسية')">
+<div class="row" onclick="location.href='resource://android/assets/home.html'">
   <div class="ic">🔍</div>
-  <div class="body"><div class="title">محرك البحث</div><div class="sub">Google (الافتراضي)</div></div>
-</a>
-<a class="row" href="javascript:alert('قريباً: دعم لغات إضافية')">
+  <div class="body"><div class="title">محرك البحث</div><div class="sub" id="engSub">Google</div></div>
+</div>
+<div class="row" onclick="showInfo('اللغة','العربية والإنجليزية مدعومتان')">
   <div class="ic">🌐</div>
   <div class="body"><div class="title">اللغة</div><div class="sub">العربية</div></div>
-</a>
+</div>
 
 <div class="sec">الخصوصية</div>
-<a class="row" href="javascript:alert('قريباً: مانع الإعلانات المتطور')">
+<div class="row" onclick="showInfo('مانع الإعلانات','قيد التطوير - سيتم تفعيله في إصدار قادم')">
   <div class="ic">🛡</div>
   <div class="body"><div class="title">مانع الإعلانات</div><div class="sub">قيد التطوير</div></div>
-</a>
-<a class="row" href="javascript:alert('قريباً: WireGuard VPN')">
+</div>
+<div class="row" onclick="showInfo('WireGuard VPN','قيد التطوير - سيتم إضافة استيراد ملفات .conf')">
   <div class="ic">🔒</div>
   <div class="body"><div class="title">WireGuard VPN</div><div class="sub">قيد التطوير</div></div>
-</a>
+</div>
 
 <div class="sec">إدارة البيانات</div>
-<a class="row" href="javascript:if(confirm('مسح السجل؟'))alert('تم')">
+<div class="row" onclick="clearData('history')">
   <div class="ic">🕘</div>
   <div class="body"><div class="title">مسح السجل</div><div class="sub">حذف سجل التصفح</div></div>
-</a>
-<a class="row" href="javascript:if(confirm('مسح الكاش؟'))alert('تم')">
+</div>
+<div class="row" onclick="clearData('all')">
   <div class="ic">🧹</div>
-  <div class="body"><div class="title">مسح الكاش</div><div class="sub">حذف الملفات المؤقتة</div></div>
-</a>
+  <div class="body"><div class="title">مسح كل البيانات</div><div class="sub">السجل + المفضلة + الإعدادات</div></div>
+</div>
 
 <div class="sec">حول</div>
-<div class="about">
-  <span class="logo">🐺</span>
-  <div class="nm">الذئب - Wolf Browser</div>
-  <div>الإصدار 1.0.0</div>
-  <div style="margin-top:10px">متصفح أندرويد بمحرك فايرفوكس</div>
+<div class="row" onclick="location.href='resource://android/assets/about.html'">
+  <div class="ic">ℹ</div>
+  <div class="body"><div class="title">حول التطبيق</div><div class="sub">Wolf Browser 1.0.0</div></div>
 </div>
+
+<script>
+function ls(k, v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k, v); }catch(e){return null;} }
+function getTheme(){ return ls('theme') || 'dark'; }
+function applyTheme(){
+  var t = getTheme();
+  document.body.classList.toggle('light', t === 'light');
+  var sw = document.getElementById('themeSw');
+  if(t === 'dark') sw.classList.add('on'); else sw.classList.remove('on');
+  document.getElementById('themeSub').textContent = t === 'dark' ? 'مفعّل' : 'موقوف';
+}
+function toggleTheme(){
+  var t = getTheme() === 'light' ? 'dark' : 'light';
+  ls('theme', t);
+  applyTheme();
+}
+function showInfo(t, m){ alert(t + '\n\n' + m); }
+function clearData(kind){
+  if(kind === 'history'){ ls('history', '[]'); showInfo('تم','تم مسح السجل'); }
+  else if(kind === 'all'){
+    if(confirm('مسح كل البيانات؟')){
+      try{ localStorage.clear(); }catch(e){}
+      showInfo('تم','تم مسح كل البيانات');
+    }
+  }
+}
+function updateEng(){
+  var e = ls('engine') || 'google';
+  var map = {google:'Google', bing:'Bing', ddg:'DuckDuckGo', yandex:'Yandex'};
+  document.getElementById('engSub').textContent = map[e] || 'Google';
+}
+applyTheme();
+updateEng();
+</script>
 </body>
 </html>

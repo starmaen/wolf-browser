@@ -4,20 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,sans-serif;background:#0B1929;color:#E8EEF4;min-height:100vh;padding:16px 14px}
-.back{display:inline-flex;color:#4FC3F7;text-decoration:none;font-size:15px;padding:10px 0;margin-bottom:10px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--bg:#0B1929;--surface:#0F2233;--primary:#4FC3F7;--text:#E8EEF4;--text-sec:rgba(232,238,244,0.55);--border:rgba(79,195,247,0.15)}
+body.light{--bg:#F0F4F8;--surface:#FFFFFF;--primary:#0288D1;--text:#0B1929;--text-sec:rgba(11,25,41,0.6);--border:rgba(2,136,209,0.2)}
+body{font-family:-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:16px 14px}
+.back{display:inline-flex;color:var(--primary);text-decoration:none;font-size:15px;padding:10px 0;margin-bottom:10px}
 h1{font-size:22px;font-weight:800;margin-bottom:20px}
-.empty{text-align:center;padding:60px 20px;color:rgba(232,238,244,0.5)}
+.empty{text-align:center;padding:60px 20px;color:var(--text-sec)}
 .empty .ic{font-size:52px;margin-bottom:12px;opacity:0.5}
 </style>
 </head>
 <body>
-<a class="back" href="file:///android_asset/home.html">→ الرئيسية</a>
+<a class="back" href="resource://android/assets/home.html">→ الرئيسية</a>
 <h1>المفضلة</h1>
-<div class="empty">
-  <div class="ic">⭐</div>
-  <p>لا توجد مواقع محفوظة بعد</p>
-</div>
+<div class="empty"><div class="ic">⭐</div><p>لا توجد مواقع محفوظة بعد</p></div>
+<script>
+function ls(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+if((ls('theme') || 'dark') === 'light') document.body.classList.add('light');
+</script>
 </body>
 </html>

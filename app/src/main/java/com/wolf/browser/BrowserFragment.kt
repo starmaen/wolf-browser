@@ -21,7 +21,8 @@ class BrowserFragment : Fragment() {
     private lateinit var session: GeckoSession
     private lateinit var runtime: GeckoRuntime
 
-    private val HOME_URL = "file:///android_asset/home.html"
+    // GeckoView يستخدم resource://android/assets/ بدلاً من file:///android_asset/
+    private val HOME_URL = "resource://android/assets/home.html"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, saved: Bundle?
@@ -53,7 +54,7 @@ class BrowserFragment : Fragment() {
         }
 
         binding.menuBtn.setOnClickListener {
-            showMenu()
+            session.loadUri("resource://android/assets/settings.html")
         }
 
         binding.urlBar.setOnEditorActionListener { _, actionId, event ->
@@ -80,35 +81,13 @@ class BrowserFragment : Fragment() {
 
     private fun updateUrlBar(url: String) {
         activity?.runOnUiThread {
-            if (url.startsWith("file:///android_asset/")) {
+            if (url.startsWith("resource://") || url.startsWith("file:///android_asset")) {
                 binding.urlBar.setText("")
                 binding.urlBar.hint = "ابحث أو اكتب عنواناً..."
             } else {
                 binding.urlBar.setText(url)
             }
         }
-    }
-
-    private fun showMenu() {
-        val options = arrayOf(
-            "الرئيسية",
-            "الإعدادات",
-            "المفضلة",
-            "السجل",
-            "حول التطبيق"
-        )
-        android.app.AlertDialog.Builder(requireContext())
-            .setTitle("القائمة")
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> session.loadUri(HOME_URL)
-                    1 -> session.loadUri("file:///android_asset/settings.html")
-                    2 -> session.loadUri("file:///android_asset/bookmarks.html")
-                    3 -> session.loadUri("file:///android_asset/history.html")
-                    4 -> session.loadUri("file:///android_asset/about.html")
-                }
-            }
-            .show()
     }
 
     override fun onDestroyView() {
