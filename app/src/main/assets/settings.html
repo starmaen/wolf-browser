@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,sans-serif;background:#0B1929;color:#E8EEF4;min-height:100vh;padding:16px 14px 40px}
+.back{display:inline-flex;align-items:center;gap:8px;color:#4FC3F7;text-decoration:none;font-size:15px;padding:10px 0;margin-bottom:10px}
+h1{font-size:22px;font-weight:800;margin-bottom:20px}
+.sec{font-size:12px;font-weight:700;letter-spacing:1px;color:rgba(232,238,244,0.55);margin:22px 4px 10px;text-transform:uppercase}
+.row{display:flex;align-items:center;gap:14px;background:#0F2233;border:1px solid rgba(79,195,247,0.15);border-radius:14px;padding:14px 16px;margin-bottom:8px;text-decoration:none;color:inherit}
+.ic{width:42px;height:42px;border-radius:12px;background:#183348;color:#4FC3F7;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.body{flex:1;min-width:0}
+.title{font-size:15px;font-weight:600}
+.sub{font-size:12px;color:rgba(232,238,244,0.55);margin-top:2px}
+.about{padding:20px 4px;color:rgba(232,238,244,0.55);font-size:13px;line-height:1.7;text-align:center}
+.about .logo{font-size:56px;display:block;margin-bottom:8px}
+.about .nm{color:#E8EEF4;font-weight:700;font-size:16px}
+</style>
+</head>
+<body>
+<a class="back" href="file:///android_asset/home.html">→ الرئيسية</a>
+<h1>الإعدادات</h1>
+
+<div class="sec">عام</div>
+<a class="row" href="javascript:alert('اختر محرك البحث في الواجهة الرئيسية')">
+  <div class="ic">🔍</div>
+  <div class="body"><div class="title">محرك البحث</div><div class="sub">Google (الافتراضي)</div></div>
+</a>
+<a class="row" href="javascript:alert('قريباً: دعم لغات إضافية')">
+  <div class="ic">🌐</div>
+  <div class="body"><div class="title">اللغة</div><div class="sub">العربية</div></div>
+</a>
+
+<div class="sec">الخصوصية</div>
+<a class="row" href="javascript:alert('قريباً: مانع الإعلانات المتطور')">
+  <div class="ic">🛡</div>
+  <div class="body"><div class="title">مانع الإعلانات</div><div class="sub">قيد التطوير</div></div>
+</a>
+<a class="row" href="javascript:alert('قريباً: WireGuard VPN')">
+  <div class="ic">🔒</div>
+  <div class="body"><div class="title">WireGuard VPN</div><div class="sub">قيد التطوير</div></div>
+</a>
+
+<div class="sec">إدارة البيانات</div>
+<a class="row" href="javascript:if(confirm('مسح السجل؟'))alert('تم')">
+  <div class="ic">🕘</div>
+  <div class="body"><div class="title">مسح السجل</div><div class="sub">حذف سجل التصفح</div></div>
+</a>
+<a class="row" href="javascript:if(confirm('مسح الكاش؟'))alert('تم')">
+  <div class="ic">🧹</div>
+  <div class="body"><div class="title">مسح الكاش</div><div class="sub">حذف الملفات المؤقتة</div></div>
+</a>
+
+<div class="sec">حول</div>
+<div class="about">
+  <span class="logo">🐺</span>
+  <div class="nm">الذئب - Wolf Browser</div>
+  <div>الإصدار 1.0.0</div>
+  <div style="margin-top:10px">متصفح أندرويد بمحرك فايرفوكس</div>
+</div>
+</body>
+</html>

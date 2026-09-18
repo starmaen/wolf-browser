@@ -18,9 +18,10 @@ class BrowserFragment : Fragment() {
     private var _binding: FragmentBrowserBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var geckoView: GeckoView
     private lateinit var session: GeckoSession
     private lateinit var runtime: GeckoRuntime
+
+    private val HOME_URL = "file:///android_asset/home.html"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, saved: Bundle?
@@ -32,42 +33,82 @@ class BrowserFragment : Fragment() {
     override fun onViewCreated(view: View, saved: Bundle?) {
         super.onViewCreated(view, saved)
 
-        geckoView = binding.geckoView
-
         runtime = GeckoRuntime.create(requireContext())
+        session = GeckoSession()
+        session.open(runtime)
 
-        session = GeckoSession().apply {
-            open(runtime)
-            loadUri("https://www.google.com")
+        session.progressDelegate = object : GeckoSession.ProgressDelegate {
+            override fun onPageStart(session: GeckoSession, url: String) {
+                updateUrlBar(url)
+            }
+            override fun onPageStop(session: GeckoSession, success: Boolean) {}
+            override fun onProgressChange(session: GeckoSession, progress: Int) {}
         }
 
-        geckoView.setSession(session)
+        binding.geckoView.setSession(session)
+        session.loadUri(HOME_URL)
 
-        binding.searchInput.setOnEditorActionListener { _, actionId, event ->
+        binding.homeBtn.setOnClickListener {
+            session.loadUri(HOME_URL)
+        }
+
+        binding.menuBtn.setOnClickListener {
+            showMenu()
+        }
+
+        binding.urlBar.setOnEditorActionListener { _, actionId, event ->
             val isEnter = event?.keyCode == KeyEvent.KEYCODE_ENTER &&
                     event.action == KeyEvent.ACTION_DOWN
             if (actionId == EditorInfo.IME_ACTION_GO || isEnter) {
-                val q = binding.searchInput.text.toString().trim()
-                if (q.isNotEmpty()) {
-                    val url = if (isUrl(q)) {
-                        if (q.startsWith("http")) q else "https://$q"
-                    } else {
-                        "https://www.google.com/search?q=" + Uri.encode(q)
-                    }
-                    session.loadUri(url)
-                }
+                doSearch(binding.urlBar.text.toString())
                 true
             } else false
         }
     }
 
-    private fun isUrl(s: String): Boolean {
-        if (s.startsWith("http://") || s.startsWith("https://")) return true
-        if (s.contains(" ")) return false
-        val first = s.split("/")[0]
-        return first.matches(
-            Regex("^[a-z0-9.-]+\\.[a-z]{2,}(:[0-9]+)?$", RegexOption.IGNORE_CASE)
+    private fun doSearch(query: String) {
+        val q = query.trim()
+        if (q.isEmpty()) return
+
+        val url = when {
+            q.startsWith("http://") || q.startsWith("https://") -> q
+            q.matches(Regex("^[a-z0-9.-]+\\.[a-z]{2,}(/.*)?$", RegexOption.IGNORE_CASE)) -> "https://$q"
+            else -> "https://www.google.com/search?q=" + Uri.encode(q)
+        }
+        session.loadUri(url)
+    }
+
+    private fun updateUrlBar(url: String) {
+        activity?.runOnUiThread {
+            if (url.startsWith("file:///android_asset/")) {
+                binding.urlBar.setText("")
+                binding.urlBar.hint = "ابحث أو اكتب عنواناً..."
+            } else {
+                binding.urlBar.setText(url)
+            }
+        }
+    }
+
+    private fun showMenu() {
+        val options = arrayOf(
+            "الرئيسية",
+            "الإعدادات",
+            "المفضلة",
+            "السجل",
+            "حول التطبيق"
         )
+        android.app.AlertDialog.Builder(requireContext())
+            .setTitle("القائمة")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> session.loadUri(HOME_URL)
+                    1 -> session.loadUri("file:///android_asset/settings.html")
+                    2 -> session.loadUri("file:///android_asset/bookmarks.html")
+                    3 -> session.loadUri("file:///android_asset/history.html")
+                    4 -> session.loadUri("file:///android_asset/about.html")
+                }
+            }
+            .show()
     }
 
     override fun onDestroyView() {

@@ -9,21 +9,46 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="8dp"
-        android:background="#0F2233">
+        android:padding="6dp"
+        android:background="#0F2233"
+        android:gravity="center_vertical">
+
+        <ImageButton
+            android:id="@+id/homeBtn"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:background="@android:color/transparent"
+            android:src="@android:drawable/ic_menu_view"
+            android:contentDescription="Home"
+            android:scaleType="centerInside"
+            android:tint="#4FC3F7" />
 
         <EditText
-            android:id="@+id/searchInput"
-            android:layout_width="match_parent"
-            android:layout_height="44dp"
+            android:id="@+id/urlBar"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:layout_weight="1"
             android:background="#132A3E"
             android:hint="ابحث أو اكتب عنواناً..."
             android:textColor="#E8EEF4"
             android:textColorHint="#80FFFFFF"
-            android:paddingHorizontal="16dp"
+            android:paddingHorizontal="14dp"
             android:singleLine="true"
             android:imeOptions="actionGo"
-            android:inputType="textUri" />
+            android:inputType="textUri"
+            android:textSize="14sp"
+            android:layout_marginHorizontal="6dp" />
+
+        <ImageButton
+            android:id="@+id/menuBtn"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:background="@android:color/transparent"
+            android:src="@android:drawable/ic_menu_more"
+            android:contentDescription="Menu"
+            android:scaleType="centerInside"
+            android:tint="#4FC3F7" />
+
     </LinearLayout>
 
     <org.mozilla.geckoview.GeckoView

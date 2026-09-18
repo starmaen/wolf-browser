@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,sans-serif;background:#0B1929;color:#E8EEF4;min-height:100vh;padding:0 14px 30px;overflow-x:hidden}
+.hero{display:flex;flex-direction:column;align-items:center;padding:30px 0 20px;gap:12px}
+.logo-ring{width:130px;height:130px;border-radius:50%;background:conic-gradient(from 200deg,#4FC3F7,#00E5FF,#4FC3F7);padding:4px;box-shadow:0 0 40px rgba(79,195,247,0.25)}
+.logo-inner{width:100%;height:100%;border-radius:50%;background:#132A3E;display:flex;align-items:center;justify-content:center;font-size:64px}
+.app-name{font-size:22px;font-weight:800}
+.app-name .en{color:#4FC3F7;font-size:16px;opacity:0.85;margin-inline-start:6px}
+.search-wrap{display:flex;align-items:center;background:#0F2233;border:1px solid rgba(79,195,247,0.2);border-radius:50px;padding:4px 6px 4px 16px;height:52px;margin-top:10px;box-shadow:0 4px 20px rgba(0,0,0,0.25)}
+.search-input{flex:1;font-size:15px;color:#E8EEF4;background:none;border:none;outline:none;padding:0 10px;min-width:0}
+.search-input::placeholder{color:rgba(232,238,244,0.5)}
+.section-title{font-size:12px;font-weight:700;letter-spacing:1px;color:rgba(232,238,244,0.55);margin:22px 4px 10px}
+.shortcuts{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.sc-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 2px;border-radius:14px;text-decoration:none;color:inherit;transition:background .15s}
+.sc-item:active{background:#0F2233}
+.sc-ico{width:54px;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,0.35)}
+.sc-name{font-size:11px;color:rgba(232,238,244,0.55);text-align:center;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hint{font-size:11px;color:rgba(232,238,244,0.4);text-align:center;padding:14px 10px}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="logo-ring"><div class="logo-inner">🐺</div></div>
+  <div class="app-name">الذئب <span class="en">Wolf</span></div>
+</div>
+
+<div class="search-wrap">
+  <span style="font-size:18px;opacity:0.6">🔍</span>
+  <input class="search-input" id="q" type="text" placeholder="ابحث أو اكتب عنواناً..." autocomplete="off">
+</div>
+
+<div class="section-title">المواقع السريعة</div>
+<div class="shortcuts" id="sc"></div>
+<div class="hint">اضغط على أي أيقونة لفتح الموقع</div>
+
+<script>
+var ENGINES = {
+  google: 'https://www.google.com/search?q=',
+  bing:   'https://www.bing.com/search?q=',
+  ddg:    'https://duckduckgo.com/?q=',
+  yandex: 'https://yandex.com/search/?text='
+};
+var SC = [
+  { name:'YouTube',  url:'https://youtube.com',        color:'#FF0000', icon:'▶' },
+  { name:'Telegram', url:'https://web.telegram.org',   color:'#229ED9', icon:'✈' },
+  { name:'WhatsApp', url:'https://web.whatsapp.com',   color:'#25D366', icon:'✆' },
+  { name:'Facebook', url:'https://facebook.com',       color:'#1877F2', icon:'f' },
+  { name:'X',        url:'https://x.com',              color:'#0A0A0A', icon:'𝕏' },
+  { name:'GitHub',   url:'https://github.com',         color:'#24292E', icon:'⎔' },
+  { name:'XDA',      url:'https://xda-developers.com', color:'#FF6E00', icon:'X' },
+  { name:'+',        url:'javascript:addSite()',       color:'',        icon:'+' }
+];
+
+function render(){
+  document.getElementById('sc').innerHTML = SC.map(function(s){
+    var sty = s.icon==='+'
+      ? 'background:#0F2233;border:2px dashed #4FC3F7;color:#4FC3F7;box-shadow:none'
+      : 'background:'+s.color;
+    return '<a class="sc-item" href="'+s.url+'">'+
+      '<div class="sc-ico" style="'+sty+'">'+s.icon+'</div>'+
+      '<div class="sc-name">'+(s.name==='+'?'إضافة':s.name)+'</div>'+
+    '</a>';
+  }).join('');
+}
+
+function addSite(){
+  var u = prompt('أدخل رابط الموقع:');
+  if(!u) return;
+  if(!/^https?:/i.test(u)) u = 'https://' + u;
+  SC.splice(SC.length-1,0,{name:u.replace(/^https?:\/\//,'').split('/')[0],url:u,color:'#8E44AD',icon:'★'});
+  render();
+}
+
+document.getElementById('q').addEventListener('keydown',function(e){
+  if(e.key!=='Enter') return;
+  var q = this.value.trim();
+  if(!q) return;
+  var url;
+  if(/^https?:\/\//i.test(q)) url = q;
+  else if(/^[a-z0-9.-]+\.[a-z]{2,}/i.test(q)) url = 'https://' + q;
+  else url = ENGINES.google + encodeURIComponent(q);
+  location.href = url;
+});
+
+render();
+</script>
+</body>
+</html>
