@@ -1,0 +1,7 @@
+<resources>
+    <style name="Theme.Wolf" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="android:statusBarColor">#0B1929</item>
+        <item name="android:navigationBarColor">#0B1929</item>
+        <item name="android:windowBackground">#0B1929</item>
+    </style>
+</resources>

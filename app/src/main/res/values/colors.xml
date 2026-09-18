@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="wolf_bg">#0B1929</color>
+    <color name="wolf_surface">#0F2233</color>
+    <color name="wolf_card">#132A3E</color>
+    <color name="wolf_primary">#4FC3F7</color>
+    <color name="wolf_text">#E8EEF4</color>
+</resources>
